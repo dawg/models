@@ -8,3 +8,7 @@ install:
 
 script: 
   - pytest testsample.py
+  
+branch:
+  - master
+  - develop

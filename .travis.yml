@@ -7,9 +7,10 @@ install:
   - pipenv install --pre
 
 script: 
-  - black --check .
-  - pytest testsample.py
+  - pipenv run black --check .
+  - pipenv run pytest testsample.py
   
 branch:
   - master
   - develop
+  - black

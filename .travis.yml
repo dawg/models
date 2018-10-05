@@ -7,6 +7,7 @@ install:
   - pipenv install --pre
 
 script: 
+  - black --check .
   - pytest testsample.py
   
 branch:

@@ -8,10 +8,18 @@ black = "*"
 pytest = "*"
 
 [packages]
-tensorflow = "*"
+requests = "*"
+tqdm = "*"
+logme = "*"
+scipy = "*"
 
 [requires]
 python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+format = "pipenv run black ."
+check = "pipenv run black --check ."
+test = "pipenv run pytest"

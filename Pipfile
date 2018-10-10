@@ -9,6 +9,10 @@ pytest = "*"
 
 [packages]
 tensorflow = "*"
+soundfile = "*"
+numpy = "*"
+logme = "*"
+musdb = "*"
 
 [requires]
 python_version = "3.6"

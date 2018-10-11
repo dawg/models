@@ -6,6 +6,8 @@ import zipfile
 
 import musdb
 
+from separation import writer
+
 HOME = os.path.expanduser("~")
 DST = os.path.join(HOME, "storage", "separation")
 
@@ -16,16 +18,21 @@ class Set:
 
 
 # TODO add logger because it is broken for some reason
-# @logme.log
-def get_dataset(set: str, path: str):
+@logme.log
+def get_dataset(set: str, path = None, logger = None):
 
     dst = DST
+
+    if path == None:        
+        # Download to dst
+
+
+        # Set path equal to download location
+
 
     if not os.path.exists(dst):
         # logger.info("Making {}".format(DST))
         os.makedirs(dst)
-
-    # TODO once we get the dataset online somewhere, we can download it here
 
     with zipfile.ZipFile(path, "r") as z:
 
@@ -44,14 +51,13 @@ def main():
         description="Preprocess the musdb18 dataset into a tensorflow record."
     )
 
-    parser.add_argument("musdb18path", help="Path to musdb18.zip")
+    parser.add_argument("--local-path", help="Path to musdb18.zip")
     args = parser.parse_args()
 
     # extract training and testing sets from archive
-    get_dataset(Set.TRAIN, args.musdb18path)
-    get_dataset(Set.TEST, args.musdb18path)
+    get_dataset(Set.TRAIN, args.local_path)
+    get_dataset(Set.TEST, args.local_path)
 
-    # TODO convert to tfrecord
 
 
 if __name__ == "__main__":

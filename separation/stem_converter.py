@@ -2,11 +2,7 @@
 
 import numpy as np
 import subprocess as sp
-import os
-import json
 import re
-import warnings
-import tempfile as tmp
 import soundfile as sf
 import argparse
 import stempeg

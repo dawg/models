@@ -4,11 +4,11 @@ python:
 
 install:
   - pip install pipenv
-  - pipenv install --pre --dev
+  - pipenv install --pre --dev --deploy
 
 script: 
-  - pipenv run black --check .
-  - pipenv run pytest testsample.py
+  - pipenv run check
+  - pipenv run test
   
 branch:
   - master

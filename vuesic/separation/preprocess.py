@@ -5,8 +5,9 @@ import tqdm
 import zipfile
 import boto3
 import botocore
-import musdb
 from boto3.session import Session
+
+import writer
 
 # from separation import writer
 # XXX for now we're just going to put these in here but we should export as environment variables
@@ -19,6 +20,7 @@ HOME = os.path.expanduser("~")
 DST = os.path.join(HOME, "storage", "separation")
 
 # XXX note that musdb18 only has a training and testing set once installed. We'll have to partition a validation set ourselves.
+# Alternatively, we could just find stems from elsewhere to use as a validation set. 
 class Set:
     TRAIN = "train"
     TEST = "test"
@@ -35,7 +37,7 @@ def download_dataset(object, dst, logger=None):
         # XXX Add a loading bar here
         logger.log("Download started")
 
-        # XXX LOAD KEYS FROM ENVIRONMENT HERE
+        # XXX LOAD KEYS FROM ENVIRONMENT HERE (or something)
         session = Session(
             aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY
         )
@@ -49,7 +51,6 @@ def download_dataset(object, dst, logger=None):
     return path
 
 
-# TODO add logger because it is broken for some reason
 @logme.log
 def get_dataset(set: str, path=None, logger=None):
 
@@ -79,7 +80,9 @@ def main():
         description="Preprocess the musdb18 dataset into a tensorflow record."
     )
 
-    parser.add_argument("--local-path", help="Path to musdb18.zip")
+    parser.add_argument(
+        "--local-path", help="Path to musdb18.zip if it has already been downloaded"
+    )
     args = parser.parse_args()
 
     # extract training and testing sets from archive
@@ -87,6 +90,10 @@ def main():
 
     get_dataset(Set.TRAIN, path)
     get_dataset(Set.TEST, path)
+
+    writer.write(os.path.join(DST, "train"), os.path.join(DST, "train.tfrecord"))
+
+    writer.write(os.path.join(DST, "test"), os.path.join(DST, "test.tfrecord"))
 
 
 if __name__ == "__main__":

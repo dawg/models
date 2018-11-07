@@ -7,6 +7,9 @@ import tqdm
 from scipy.io import wavfile
 import numpy as np
 import tensorflow as tf
+import musdb
+import stempeg
+
 
 
 class Data:
@@ -101,47 +104,44 @@ def write_record(
 
 @logme.log
 def write(src: str, dst: str, logger=None):
-    if not dst.endswith(".tfrecord"):
-        raise ValueError("{} must end with .tfrecord".format(dst))
 
-    if not os.path.isfile(src):
-        raise FileNotFoundError("{} is not a file!".format(src))
+    class Stem:
+        MIX = 0,
+        DRUMS = 1,
+        BASS = 2,
+        OTHER = 3,
+        VOCALS = 4,
 
-    if os.path.isfile(dst):
+    if not os.path.isdir(src):
+        raise FileNotFoundError("{} does not exist!".format(src))
+
+    if os.path.isdir(dst):
         raise FileExistsError("{} already exists!".format(dst))
 
     logger.info("Creating {}".format(dst))
-    writer = tf.python_io.TFRecordWriter(dst)
+    writer = tf.python_io.TFRecordWriter(os.path.join(dst))
     try:
         logger.info("Reading examples from {}".format(src))
-        with open(src) as fp:
-            samples = json.load(fp)  # type: dict
+        data = {}
+        for fname in tqdm.tqdm(os.listdir(src), unit="Ex"): 
 
-        logger.info("{} examples will be created".format(len(samples)))
-        directory = os.path.join(os.path.dirname(src), "audio")
-        for fname, data in tqdm.tqdm(samples.items(), unit="Ex"):
-            wname = os.path.join(directory, f"{fname}.wav")
+            sname = os.path.join(src, fname)
 
-            if not os.path.exists(wname):
-                raise FileNotFoundError(f"{wname} not found")
+            if not os.path.exists(sname):
+                raise FileNotFoundError(f"{sname} not found")
 
-            _, audio = wavfile.read(wname)
-            data["audio"] = audio
+            stem, rate = stempeg.read_stems(sname)
+
+            data['mix'] = np.array(stem[Stem.MIX, :, :].view('int64'))
+            data['vocals'] = np.array(stem[Stem.VOCALS, :, :].view('int64'))
 
             dataset = {
-                "note_str": String(),
-                "pitch": Ints([1]),
-                "velocity": Ints([1]),
-                "audio": Floats([64000]),
-                "qualities": Ints([10]),
-                "instrument_source": Ints([1]),
-                "instrument_family": Ints([1]),
+                "mix": Ints(data['mix'].shape), 
+                "vocals": Ints(data['vocals'].shape)
             }
 
-            data["pitch"] = [data["pitch"]]
-            data["velocity"] = [data["velocity"]]
-
             write_record(data, writer, dataset)
+
     except Exception:
         logger.info(f"Removing {dst}")
         if os.path.exists(dst):

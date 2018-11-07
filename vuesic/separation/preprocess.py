@@ -20,7 +20,7 @@ HOME = os.path.expanduser("~")
 DST = os.path.join(HOME, "storage", "separation")
 
 # XXX note that musdb18 only has a training and testing set once installed. We'll have to partition a validation set ourselves.
-# Alternatively, we could just find stems from elsewhere to use as a validation set. 
+# Alternatively, we could just find stems from elsewhere to use as a validation set.
 class Set:
     TRAIN = "train"
     TEST = "test"

@@ -11,7 +11,6 @@ import musdb
 import stempeg
 
 
-
 class Data:
     def __init__(self, dtype, shape):
         self.dtype = dtype
@@ -104,13 +103,12 @@ def write_record(
 
 @logme.log
 def write(src: str, dst: str, logger=None):
-
     class Stem:
-        MIX = 0,
-        DRUMS = 1,
-        BASS = 2,
-        OTHER = 3,
-        VOCALS = 4,
+        MIX = (0,)
+        DRUMS = (1,)
+        BASS = (2,)
+        OTHER = (3,)
+        VOCALS = (4,)
 
     if not os.path.isdir(src):
         raise FileNotFoundError("{} does not exist!".format(src))
@@ -123,7 +121,7 @@ def write(src: str, dst: str, logger=None):
     try:
         logger.info("Reading examples from {}".format(src))
         data = {}
-        for fname in tqdm.tqdm(os.listdir(src), unit="Ex"): 
+        for fname in tqdm.tqdm(os.listdir(src), unit="Ex"):
 
             sname = os.path.join(src, fname)
 
@@ -132,12 +130,12 @@ def write(src: str, dst: str, logger=None):
 
             stem, rate = stempeg.read_stems(sname)
 
-            data['mix'] = np.array(stem[Stem.MIX, :, :].view('int64'))
-            data['vocals'] = np.array(stem[Stem.VOCALS, :, :].view('int64'))
+            data["mix"] = np.array(stem[Stem.MIX, :, :].view("int64"))
+            data["vocals"] = np.array(stem[Stem.VOCALS, :, :].view("int64"))
 
             dataset = {
-                "mix": Ints(data['mix'].shape), 
-                "vocals": Ints(data['vocals'].shape)
+                "mix": Ints(data["mix"].shape),
+                "vocals": Ints(data["vocals"].shape),
             }
 
             write_record(data, writer, dataset)

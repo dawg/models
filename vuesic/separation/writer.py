@@ -130,12 +130,12 @@ def write(src: str, dst: str, logger=None):
 
             stem, rate = stempeg.read_stems(sname)
 
-            data["mix"] = np.array(stem[Stem.MIX, :, :].view("int64"))
-            data["vocals"] = np.array(stem[Stem.VOCALS, :, :].view("int64"))
+            data["mix"] = np.array(stem[Stem.MIX, :, :])
+            data["vocals"] = np.array(stem[Stem.VOCALS, :, :])
 
             dataset = {
-                "mix": Ints(data["mix"].shape),
-                "vocals": Ints(data["vocals"].shape),
+                "mix": FLoats(data["mix"].shape),
+                "vocals": Floats(data["vocals"].shape),
             }
 
             write_record(data, writer, dataset)

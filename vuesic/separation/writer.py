@@ -192,8 +192,8 @@ def write_np(src: str, dst: str, logger=None):
 
             stem, rate = stempeg.read_stems(sname)
 
-            np.save(os.path.join(dst, "vocals", fname), stem[Stem.VOCALS, :, :])
-            np.save(os.path.join(dst, "mix", fname), stem[Stem.MIX, :, :])
+            np.save(os.path.join(dst, "vocals", fname), stem[Stem.VOCALS, :, :].astype(np.int16))
+            np.save(os.path.join(dst, "mix", fname), stem[Stem.MIX, :, :].astype(np.int16))
 
     except Exception:
         logger.info(f"Removing {dst}")

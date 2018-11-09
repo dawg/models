@@ -88,12 +88,11 @@ def main():
     # extract training and testing sets from archive
     path = args.local_path
 
-    get_dataset(Set.TRAIN, path)
-    get_dataset(Set.TEST, path)
+    # get_dataset(Set.TRAIN, path)
+    # get_dataset(Set.TEST, path)
 
-    writer.write(os.path.join(DST, "train"), os.path.join(DST, "train.tfrecord"))
-
-    writer.write(os.path.join(DST, "test"), os.path.join(DST, "test.tfrecord"))
+    writer.write_np(os.path.join(DST, "train"), os.path.join(DST, "np_train"))
+    writer.write_np(os.path.join(DST, "test"), os.path.join(DST, "np_test"))
 
 
 if __name__ == "__main__":

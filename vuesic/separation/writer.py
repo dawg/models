@@ -11,6 +11,14 @@ import musdb
 import stempeg
 
 
+class Stem:
+    MIX = (0,)
+    DRUMS = (1,)
+    BASS = (2,)
+    OTHER = (3,)
+    VOCALS = (4,)
+
+
 class Data:
     def __init__(self, dtype, shape):
         self.dtype = dtype
@@ -38,6 +46,8 @@ class Data:
             return self._float32_feature_list(value)
         elif self.dtype == tf.int64:
             return self._int64_feature_list(value)
+        elif self.dtype == tf.uint8:
+            return self._bytes_feature_list(value)
         else:
             raise NotImplementedError(
                 "Encoding for {} not supported.".format(self.dtype)
@@ -89,6 +99,11 @@ class Ints(Data):
         super().__init__(tf.int64, shape)
 
 
+class Bytes(Data):
+    def __init__(self, shape):
+        super().__init__(tf.uint8, shape)
+
+
 def write_record(
     data: dict, writer: tf.python_io.TFRecordWriter, dataset: Dict[str, Data]
 ):
@@ -103,12 +118,6 @@ def write_record(
 
 @logme.log
 def write(src: str, dst: str, logger=None):
-    class Stem:
-        MIX = (0,)
-        DRUMS = (1,)
-        BASS = (2,)
-        OTHER = (3,)
-        VOCALS = (4,)
 
     if not os.path.isdir(src):
         raise FileNotFoundError("{} does not exist!".format(src))
@@ -130,12 +139,14 @@ def write(src: str, dst: str, logger=None):
 
             stem, rate = stempeg.read_stems(sname)
 
-            data["mix"] = np.array(stem[Stem.MIX, :, :])
-            data["vocals"] = np.array(stem[Stem.VOCALS, :, :])
+            data["mix"] = np.array(stem[Stem.MIX, :, :].view(dtype=np.int16).tobytes())
+            data["vocals"] = np.array(
+                stem[Stem.VOCALS, :, :].view(dtype=np.int16).tobytes()
+            )
 
             dataset = {
-                "mix": FLoats(data["mix"].shape),
-                "vocals": Floats(data["vocals"].shape),
+                "mix": Bytes(data["mix"].shape),
+                "vocals": Bytes(data["vocals"].shape),
             }
 
             write_record(data, writer, dataset)
@@ -147,3 +158,45 @@ def write(src: str, dst: str, logger=None):
         raise
     finally:
         writer.close()
+
+
+@logme.log
+def write_np(src: str, dst: str, logger=None):
+
+    if not os.path.isdir(src):
+        raise FileNotFoundError("{} does not exist!".format(src))
+
+    if not os.path.isdir(dst):
+        logger.info("Creating {}".format(dst))
+        os.mkdir(dst)
+
+    vocaldst = os.path.join(dst, "vocals")
+
+    if not os.path.exists(vocaldst):
+        os.mkdir(vocaldst)
+
+    mixdst = os.path.join(dst, "mix")
+
+    if not os.path.exists(mixdst):
+        os.mkdir(mixdst)
+
+    try:
+        logger.info("Reading examples from {}".format(src))
+
+        for fname in tqdm.tqdm(os.listdir(src), unit="Ex"):
+
+            sname = os.path.join(src, fname)
+
+            if not os.path.exists(sname):
+                raise FileNotFoundError(f"{sname} not found")
+
+            stem, rate = stempeg.read_stems(sname)
+
+            np.save(os.path.join(dst, "vocals", fname), stem[Stem.VOCALS, :, :])
+            np.save(os.path.join(dst, "mix", fname), stem[Stem.MIX, :, :])
+
+    except Exception:
+        logger.info(f"Removing {dst}")
+        if os.path.exists(dst):
+            os.remove(dst)
+        raise

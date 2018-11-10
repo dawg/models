@@ -194,10 +194,10 @@ def write_np(src: str, dst: str, logger=None):
 
             np.save(
                 os.path.join(dst, "vocals", fname),
-                stem[Stem.VOCALS, :, :].astype(np.int16),
+                stem[Stem.VOCALS, :, :].astype(np.float16),
             )
             np.save(
-                os.path.join(dst, "mix", fname), stem[Stem.MIX, :, :].astype(np.int16)
+                os.path.join(dst, "mix", fname), stem[Stem.MIX, :, :].astype(np.float16)
             )
 
     except Exception:

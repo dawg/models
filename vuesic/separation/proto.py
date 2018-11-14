@@ -3,30 +3,28 @@ import numpy as np
 import os
 import tqdm
 import matplotlib.pyplot as plt
+from SeparationDataset import SeparationDataset
+
+# Interactive plotting
+plt.ion()
 
 HOME = os.path.expanduser("~")
 TEST = os.path.join(HOME, "storage", "separation", "np_test")
 TRAIN = os.path.join(HOME, "storage", "separation", "np_train")
-
-
-#%%
-# Sample
-fname = os.listdir(os.path.join(TRAIN, "mix"))[0]
-x = np.load(os.path.join(src, "mix", fname))
-plt.figure(1)
-plt.title("Audio Sample: {}".format(fname))
-plt.plot(range(1000), np.transpose(x[:, 0:1000, 0]))
-plt.xlabel("Sample")
-plt.ylabel("Amplitude")
-plt.xlim(0, 1000)
-plt.show()
-
+ds = SeparationDataset(TRAIN)
 
 #%%
-for fname in tqdm.tqdm(os.listdir(os.path.join(src, "mix")), unit="Ex"):
-    print(fname)
-    x = np.load(os.path.join(src, "mix", fname))
-    y = np.load(os.path.join(src, "vocals", fname))
+nsamples = 1000
+idx = 0
+sample = ds[idx]
+x = sample["mix"]
+y = sample["vocals"]
 
-    # do something
-    break
+f, subplot = plt.subplots(2, sharex=True, sharey=True)
+
+subplot[0].set_title("Audio Sample: {}".format(ds.filenames[idx]))
+subplot[0].set_xlim(0, nsamples)
+subplot[0].plot(range(nsamples), np.transpose(x[:, 0:nsamples, 0]))
+subplot[0].set_ylabel("Mix")
+subplot[1].plot(range(nsamples), np.transpose(y[:, 0:nsamples, 0]))
+subplot[1].set_ylabel("Vocals")

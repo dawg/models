@@ -10,8 +10,10 @@ python:
 install:
   - pip install --upgrade pip
   - pip --version
-  - pip install pipenv
-  - pipenv sync
+  - pip install pipenv==2018.10.9
+  - pipenv --version
+  - pipenv install --pre --dev --deploy
+
 script: 
   - pipenv run check
   - pipenv run test

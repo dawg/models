@@ -9,7 +9,7 @@ python:
 
 install:
   - pip install pipenv
-  - pipenv install --pre --dev --deploy
+  - pipenv sync
 
 script: 
   - pipenv run check

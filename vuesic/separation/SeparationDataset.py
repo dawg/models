@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 # TODO this should inherit from either tensorflow or pytorch's dataset
-class SeparationDataset:
+class SeparationDataset(object):
     def __init__(self, root_dir, transform=None):
         """
         Args:

@@ -1,63 +1,91 @@
 import os
 import argparse
+import threading
 import logme
 import tqdm
 import zipfile
 import boto3
 import botocore
+import stempeg
 from boto3.session import Session
 
-import writer
-
-# from separation import writer
-# XXX for now we're just going to put these in here but we should export as environment variables
 ACCESS_KEY = "xxx"
 SECRET_KEY = "xxx"
-BUCKET_NAME = "vuesic-musdbd18"  # replace with your bucket name
-OBJECT = "musdb18.zip"  # replace with your object key
-
+BUCKET_NAME = "vuesic-musdbd18"
+OBJECT = "musdb18.zip"
 HOME = os.path.expanduser("~")
 DST = os.path.join(HOME, "storage", "separation")
 
-# XXX note that musdb18 only has a training and testing set once installed. We'll have to partition a validation set ourselves.
-# Alternatively, we could just find stems from elsewhere to use as a validation set.
+
 class Set:
     TRAIN = "train"
     TEST = "test"
 
 
-@logme.log
-def download_dataset(object, dst, logger=None):
+class CallbackProgressBar(object):
+    def __init__(self, total, unit=None):
+        """
+        Args:
+            total (int): Total number of iterations 
+            unit (string, optional): Unit with respect to each iteration
+        """
+        self.pbar = tqdm.tqdm(total=total, unit=unit)
+        self.lock = threading.Lock()
 
+    def __call__(self, update):
+        """
+        Args:
+            update (int): Iterations completed since last update
+        """
+        with self.lock:
+            self.pbar.update(update)
+
+
+@logme.log
+def download_dataset(key, dst, logger=None):
+    """
+    Args:
+        key (string): filename to be retrieved from our bucket
+        logger (object, optional): logger object (taken care of by decorator)
+    """
     # Download dst
-    path = os.path.join(dst, object)
+    path = os.path.join(dst, key)
 
     if not os.path.isfile(path):
 
-        # XXX Add a loading bar here
-        logger.log("Download started")
+        logger.info("Download started")
 
-        # XXX LOAD KEYS FROM ENVIRONMENT HERE (or something)
         session = Session(
             aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY
         )
 
-        s3 = session.resource("s3")
+        bucket = session.resource("s3").Bucket(BUCKET_NAME)
 
-        s3.Bucket(BUCKET_NAME).download_file(object, path)
+        pbar = CallbackProgressBar(
+            bucket.Object(key).get()["ContentLength"], unit="bytes"
+        )
 
-        logger.log("Done!")
+        try:
+            bucket.download_file(key, path, Callback=pbar)
+        except Exception:
+            logger.info(f"Failed to download {key}")
+            raise
 
     return path
 
 
 @logme.log
 def get_dataset(set: str, path=None, logger=None):
-
+    """
+    Args:
+        set (string): filename to be retrieved from our bucket
+        path (string, optional): path to musdb18.zip if it has already been downloaded
+        logger (object, optional): logger
+    """
     dst = DST
 
     if not os.path.exists(dst):
-        logger.info("Making {}".format(dst))
+        logger.info(f"Making {dst}")
         os.makedirs(dst)
 
     if path == None:
@@ -65,14 +93,73 @@ def get_dataset(set: str, path=None, logger=None):
 
     with zipfile.ZipFile(path, "r") as z:
 
-        members = []
-        for f in z.namelist():
-            if f.startswith(set):
-                members.append(f)
-
-        z.extractall(path=dst, members=members)
+        logger.info(f"Extracting files from {path}")
+        for fname in tqdm.tqdm(z.namelist(), unit="Ex"):
+            if fname.startswith(set) and not os.path.exists(os.path.join(dst, fname)):
+                z.extractall(path=dst, members=[fname])
 
     return
+
+
+@logme.log
+def write_np(src: str, dst: str, logger=None):
+    """
+    Args:
+        src (string): directory containing raw samples
+        dst (string): destination for numpy files
+        logger (object, optional): logger
+    """
+
+    if not os.path.isdir(src):
+        raise FileNotFoundError(f"{src} does not exist!")
+
+    if not os.path.isdir(dst):
+        logger.info(f"Creating {dst}")
+        os.mkdir(dst)
+
+    vocaldst = os.path.join(dst, "vocals")
+
+    if not os.path.exists(vocaldst):
+        os.mkdir(vocaldst)
+
+    mixdst = os.path.join(dst, "mix")
+
+    if not os.path.exists(mixdst):
+        os.mkdir(mixdst)
+
+    try:
+        logger.info(f"Reading examples from {src}")
+
+        for fname in tqdm.tqdm(os.listdir(src), unit="Ex"):
+            if not fname.endswith("stem.mp4"):
+                continue
+
+            sname = os.path.join(src, fname)
+
+            if not os.path.exists(sname):
+                raise FileNotFoundError(f"{sname} not found")
+
+            if not os.path.exists(
+                os.path.join(dst, "vocals", fname + ".npy")
+            ) and not os.path.exists(os.path.join(dst, "mix", fname + ".npy")):
+
+                stem, rate = stempeg.read_stems(sname)
+
+                np.save(
+                    os.path.join(dst, "vocals", fname),
+                    stem[Stem.VOCALS, :, :].astype(np.float16),
+                )
+
+                np.save(
+                    os.path.join(dst, "mix", fname),
+                    stem[Stem.MIX, :, :].astype(np.float16),
+                )
+
+    except Exception:
+        logger.info(f"Removing {dst}")
+        if os.path.exists(dst):
+            os.remove(dst)
+        raise
 
 
 def main():
@@ -85,14 +172,13 @@ def main():
     )
     args = parser.parse_args()
 
-    # extract training and testing sets from archive
     path = args.local_path
 
     get_dataset(Set.TRAIN, path)
     get_dataset(Set.TEST, path)
 
-    writer.write_np(os.path.join(DST, "train"), os.path.join(DST, "np_train"))
-    writer.write_np(os.path.join(DST, "test"), os.path.join(DST, "np_test"))
+    write_np(os.path.join(DST, "train"), os.path.join(DST, "np_train"))
+    write_np(os.path.join(DST, "test"), os.path.join(DST, "np_test"))
 
 
 if __name__ == "__main__":

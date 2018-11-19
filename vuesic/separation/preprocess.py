@@ -23,7 +23,7 @@ class Set:
 
 
 class CallbackProgressBar(object):
-    def __init__(self, total, unit=None):
+    def __init__(self, total: int, unit=None):
         """
         Args:
             total (int): Total number of iterations 
@@ -32,7 +32,7 @@ class CallbackProgressBar(object):
         self.pbar = tqdm.tqdm(total=total, unit=unit)
         self.lock = threading.Lock()
 
-    def __call__(self, update):
+    def __call__(self, update: int):
         """
         Args:
             update (int): Iterations completed since last update
@@ -42,10 +42,11 @@ class CallbackProgressBar(object):
 
 
 @logme.log
-def download_dataset(key, dst, logger=None):
+def download_dataset(key: str, dst: str, logger=None):
     """
     Args:
         key (string): filename to be retrieved from our bucket
+        dst (string): download directory
         logger (object, optional): logger object (taken care of by decorator)
     """
     # Download dst

@@ -7,6 +7,8 @@ import zipfile
 import boto3
 import botocore
 import stempeg
+import torch
+import numpy as np
 from boto3.session import Session
 
 ACCESS_KEY = "xxx"
@@ -22,11 +24,20 @@ class Set:
     TEST = "test"
 
 
+class Stem:
+    MIX = (0,)
+    DRUMS = (1,)
+    BASS = (2,)
+    OTHER = (3,)
+    VOCALS = (4,)
+
+
 class CallbackProgressBar(object):
-    def __init__(self, total: int, unit=None):
+    def __init__(self, total: int, unit: str = None):
         """
         Args:
-            total (int): Total number of iterations 
+            total (int): Total number of iterations
+
             unit (string, optional): Unit with respect to each iteration
         """
         self.pbar = tqdm.tqdm(total=total, unit=unit)
@@ -46,7 +57,9 @@ def download_dataset(key: str, dst: str, logger=None):
     """
     Args:
         key (string): filename to be retrieved from our bucket
+
         dst (string): download directory
+
         logger (object, optional): logger object (taken care of by decorator)
     """
     # Download dst
@@ -76,11 +89,13 @@ def download_dataset(key: str, dst: str, logger=None):
 
 
 @logme.log
-def get_dataset(set: str, path=None, logger=None):
+def get_dataset(set: str, path: str = None, logger: object = None):
     """
     Args:
         set (string): filename to be retrieved from our bucket
+
         path (string, optional): path to musdb18.zip if it has already been downloaded
+
         logger (object, optional): logger
     """
     dst = DST
@@ -102,12 +117,52 @@ def get_dataset(set: str, path=None, logger=None):
     return
 
 
+def write_stem_np(dst: str, fname: str, stem: object):
+    """
+    Args:
+        dst (string): download directory
+
+        fname (string): file name of the stem
+
+        stem (object): numpy array containing stem
+    """
+
+    mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float16))
+    vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float16))
+
+    np.save(os.path.join(dst, "mix", fname), mix)
+    np.save(os.path.join(dst, "vocals", fname), vocals)
+
+
+def write_stem_pt(dst: str, fname: str, stem: object):
+    """
+    Args:
+        dst (string): download directory
+
+        fname (string): file name of the stem
+
+        stem (object): numpy array containing stem
+    """
+
+    mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float16))
+    vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float16))
+
+    fname += ".pth"
+
+    torch.save(mix, os.path.join(dst, "mix", fname))
+    torch.save(vocals, os.path.join(dst, "vocals", fname))
+
+
 @logme.log
-def write_np(src: str, dst: str, logger=None):
+def write(src: str, dst: str, asnp: bool = False, logger: object = None):
     """
     Args:
         src (string): directory containing raw samples
-        dst (string): destination for numpy files
+
+        dst (string): destination for binary files
+
+        asnp (bool): save as numpy arrays? Will save as pytorch tensor by default
+        
         logger (object, optional): logger
     """
 
@@ -130,6 +185,7 @@ def write_np(src: str, dst: str, logger=None):
 
     try:
         logger.info(f"Reading examples from {src}")
+        suffix = ".npy" if asnp else ".pth"
 
         for fname in tqdm.tqdm(os.listdir(src), unit="Ex"):
             if not fname.endswith("stem.mp4"):
@@ -141,20 +197,15 @@ def write_np(src: str, dst: str, logger=None):
                 raise FileNotFoundError(f"{sname} not found")
 
             if not os.path.exists(
-                os.path.join(dst, "vocals", fname + ".npy")
-            ) and not os.path.exists(os.path.join(dst, "mix", fname + ".npy")):
+                os.path.join(dst, "vocals", fname + suffix)
+            ) and not os.path.exists(os.path.join(dst, "mix", fname + suffix)):
 
                 stem, rate = stempeg.read_stems(sname)
 
-                np.save(
-                    os.path.join(dst, "vocals", fname),
-                    stem[Stem.VOCALS, :, :].astype(np.float16),
-                )
-
-                np.save(
-                    os.path.join(dst, "mix", fname),
-                    stem[Stem.MIX, :, :].astype(np.float16),
-                )
+                if asnp:
+                    write_stem_np(dst, fname, stem)
+                else:
+                    write_stem_pt(dst, fname, stem)
 
     except Exception:
         logger.info(f"Removing {dst}")
@@ -178,8 +229,8 @@ def main():
     get_dataset(Set.TRAIN, path)
     get_dataset(Set.TEST, path)
 
-    write_np(os.path.join(DST, "train"), os.path.join(DST, "np_train"))
-    write_np(os.path.join(DST, "test"), os.path.join(DST, "np_test"))
+    write(os.path.join(DST, "train"), os.path.join(DST, "pt_train"))
+    write(os.path.join(DST, "test"), os.path.join(DST, "pt_test"))
 
 
 if __name__ == "__main__":

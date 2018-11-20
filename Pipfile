@@ -16,6 +16,8 @@ musdb = "*"
 requests = "*"
 tqdm = "*"
 scipy = "*"
+torch = "==0.4.1"
+torchvision = "*"
 
 [requires]
 python_version = "3.6"

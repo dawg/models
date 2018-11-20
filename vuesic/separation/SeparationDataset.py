@@ -1,10 +1,11 @@
-# from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader
+import torch
 import numpy as np
 import os
 
 # TODO this should inherit from either tensorflow or pytorch's dataset
-class SeparationDataset(object):
-    def __init__(self, root_dir, transform=None):
+class SeparationDataset(Dataset):
+    def __init__(self, root_dir: str, transform: callable = None, asnp: bool = False):
         """
         Args:
             root_dir (string): Directory with the mix and vocals directories. 
@@ -12,21 +13,36 @@ class SeparationDataset(object):
         
             transform (callable, optional): Optional transform to be applied 
             on a sample.
+
+            asnp (bool): load as numpy arrays? Will save as pytorch tensor by default
         """
+
         self.root_dir = root_dir
+        self.transform = transform
+        self.asnp = asnp
+
+        suffix = ".npy" if asnp else ".pth"
+
         self.filenames = [
             name
             for name in os.listdir(os.path.join(root_dir, "mix"))
-            if name.endswith(".stem.mp4.npy")
+            if name.endswith(suffix)
         ]
-        self.transform = transform
 
     def __len__(self):
         return len(self.filenames)
 
-    def __getitem__(self, idx):
-        mix = np.load(os.path.join(self.root_dir, "mix", self.filenames[idx]))
-        vocals = np.load(os.path.join(self.root_dir, "vocals", self.filenames[idx]))
+    def __getitem__(self, idx: int):
+
+        mixpath = os.path.join(self.root_dir, "mix", self.filenames[idx])
+        vocalpath = os.path.join(self.root_dir, "vocals", self.filenames[idx])
+
+        if self.asnp:
+            mix = np.load(mixpath)
+            vocals = np.load(vocalpath)
+        else:
+            mix = torch.load(mixpath)
+            vocals = torch.load(vocalpath)
 
         sample = {"mix": mix, "vocals": vocals}
 

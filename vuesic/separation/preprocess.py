@@ -62,7 +62,6 @@ def download_dataset(key: str, dst: str, logger=None):
 
         logger (object, optional): logger object (taken care of by decorator)
     """
-    # Download dst
     path = os.path.join(dst, key)
 
     if not os.path.isfile(path):

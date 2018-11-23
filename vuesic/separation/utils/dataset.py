@@ -3,7 +3,6 @@ import torch
 import numpy as np
 import os
 
-# TODO this should inherit from either tensorflow or pytorch's dataset
 class SeparationDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None, asnp: bool = False):
         """
@@ -41,8 +40,9 @@ class SeparationDataset(Dataset):
             mix = np.load(mixpath)
             vocals = np.load(vocalpath)
         else:
-            mix = torch.load(mixpath)
-            vocals = torch.load(vocalpath)
+            # todo how does this compare to GPU?
+            mix = torch.load(mixpath).float()
+            vocals = torch.load(vocalpath).float()
 
         sample = {"mix": mix, "vocals": vocals}
 

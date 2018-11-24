@@ -42,8 +42,8 @@ class SeparationDataset(Dataset):
             vocals = np.load(vocalpath)
         else:
             # todo how does this compare to GPU?
-            mix = torch.load(mixpath).float()
-            vocals = torch.load(vocalpath).float()
+            mix = torch.load(mixpath)
+            vocals = torch.load(vocalpath)
 
         sample = {"mix": mix, "vocals": vocals}
 

@@ -6,27 +6,49 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 import scipy.signal
 
-# fixme
+# TODO move to test script with main
+# from dataset import SeparationDataset
+# import os
+# import PyQt5
+# import matplotlib.pyplot as plt
 
+# TODO Amir refactoring, adding comments, and seperate the testing
 
-# TODO Amir refactoring
 
 class STFT(nn.Module):
-    def __init__(self, nfft=1024, hop_length=512, window="hanning"):
+    def __init__(
+        self, window_size: int = 1024, hop_size: int = 512, window: str = "hanning"
+    ):
+        """
+        Desc: 
+            create an STFT object
+
+        Args:
+            src (string): directory containing raw samples
+
+            dst (string): destination for binary files
+
+            asnp (bool): save as numpy arrays? Will save as pytorch tensor by default
+            
+            logger (object, optional): logger
+        """
+
         super(STFT, self).__init__()
-        assert nfft % 2 == 0
 
-        self.hop_length = hop_length
-        self.n_freq = n_freq = nfft // 2 + 1
+        # break if the window_size isn't an even number
+        assert window_size % 2 == 0
 
-        self.real_kernels, self.imag_kernels = _get_stft_kernels(nfft, window)
+        self.hop_size = hop_size
+        self.n_freq = n_freq = window_size // 2 + 1
 
-    def forward(self, sample):
+        self.real_kernels, self.imag_kernels = _get_stft_kernels(window_size, window)
+
+    def forward(self, sample: torch.float):
         sample = sample.unsqueeze(1)
         sample = sample.unsqueeze(1)
 
-        magn = F.conv2d(sample, self.real_kernels, stride=self.hop_length)
-        phase = F.conv2d(sample, self.imag_kernels, stride=self.hop_length)
+        magn = F.conv2d(sample, self.real_kernels, stride=self.hop_size)
+        phase = F.conv2d(sample, self.imag_kernels, stride=self.hop_size)
 
         magn = magn.permute(0, 2, 1, 3)
         phase = phase.permute(0, 2, 1, 3)
@@ -38,19 +60,22 @@ class STFT(nn.Module):
         return magn, phase, ac
 
 
-def _get_stft_kernels(nfft, window):
-    nfft = int(nfft)
-    assert nfft % 2 == 0
+def _get_stft_kernels(window_size: int, window: str):
+
+    # break if the window_size isn't an even number
+    assert window_size % 2 == 0
 
     def kernel_fn(freq, time):
-        return np.exp(-1j * (2 * np.pi * time * freq) / float(nfft))
+        return np.exp(-1j * (2 * np.pi * time * freq) / float(window_size))
 
-    kernels = np.fromfunction(kernel_fn, (nfft // 2 + 1, nfft), dtype=np.float64)
+    kernels = np.fromfunction(
+        kernel_fn, (window_size // 2 + 1, window_size), dtype=np.float64
+    )
 
     if window == "hanning":
-        win_cof = scipy.signal.get_window("hanning", nfft)[np.newaxis, :]
+        win_cof = scipy.signal.get_window("hanning", window_size)[np.newaxis, :]
     else:
-        win_cof = np.ones((1, nfft), dtype=np.float64)
+        win_cof = np.ones((1, window_size), dtype=np.float64)
 
     kernels = kernels[:, np.newaxis, np.newaxis, :] * win_cof
 
@@ -61,18 +86,33 @@ def _get_stft_kernels(nfft, window):
 
 
 class ISTFT(nn.Module):
-    def __init__(self, nfft=1024, hop_length=512):
-        super(ISTFT, self).__init__()
-        assert nfft % 2 == 0
-        assert hop_length <= nfft
-        self.hop_length = hop_length
+    def __init__(self, window_size=1024, hop_size=512):
+        """
+        Desc: 
+            create an ISTFT object
 
-        self.nfft = int(nfft)
-        self.n_freq = n_freq = int(nfft / 2)
-        self.real_kernels, self.imag_kernels, self.ac_cof = _get_istft_kernels(nfft)
-        trans_kernels = np.zeros((nfft, nfft), np.float64)
-        np.fill_diagonal(trans_kernels, np.ones((nfft,), dtype=np.float64))
-        # self.win_cof = 1 / scipy.signal.get_window("hanning", nfft)
+        Args:
+            window_size (int): the size of the window used for the stft
+
+            hope_length (int): the length of the hop step used in the stft
+        """
+        super(ISTFT, self).__init__()
+
+        # break if the window_size isn't an even number
+        assert window_size % 2 == 0
+
+        # break if the window size is less than the hop size
+        assert hop_size <= window_size
+        self.hop_size = hop_size
+
+        self.window_size = int(window_size)
+        self.n_freq = n_freq = int(window_size / 2)
+        self.real_kernels, self.imag_kernels, self.ac_cof = _get_istft_kernels(
+            window_size
+        )
+        trans_kernels = np.zeros((window_size, window_size), np.float64)
+        np.fill_diagonal(trans_kernels, np.ones((window_size,), dtype=np.float64))
+        # self.win_cof = 1 / scipy.signal.get_window("hanning", window_size)
         # self.win_cof[0] = 0
         # self.win_cof = torch.from_numpy(self.win_cof).float()
         # self.win_cof = nn.Parameter(self.win_cof, requires_grad=False)
@@ -82,11 +122,15 @@ class ISTFT(nn.Module):
 
     def forward(self, magn, phase, ac):
         """
-        batch None frequency frame
+        Desc: 
+            Implementing the forward method from the nn.module to obtain
+            the ISFFT            
+
+        Args:
         """
         assert magn.size()[2] == phase.size()[2] == self.n_freq
-        nfft = self.nfft
-        hop = self.hop_length
+        window_size = self.window_size
+        hop = self.hop_size
 
         # complex conjugate
         phase = -1.0 * phase
@@ -98,25 +142,25 @@ class ISTFT(nn.Module):
         ac = ac.unsqueeze(1)
         ac = float(self.ac_cof) * ac.expand_as(output)
         output = output + ac
-        output = output / float(self.nfft)
+        output = output / float(self.window_size)
 
-        output = F.conv_transpose2d(output, self.trans_kernels, stride=self.hop_length)
+        output = F.conv_transpose2d(output, self.trans_kernels, stride=self.hop_size)
         output = output.squeeze(1)
         output = output.squeeze(1)
         # output[:, :hop] = output[:, :hop].mul(self.win_cof[:hop])
-        # output[:, -(nfft - hop):] = output[:, -(nfft - hop):].mul(self.win_cof[-(nfft - hop):])
+        # output[:, -(window_size - hop):] = output[:, -(window_size - hop):].mul(self.win_cof[-(window_size - hop):])
         return output
 
 
-def _get_istft_kernels(nfft):
-    nfft = int(nfft)
-    assert nfft % 2 == 0
+def _get_istft_kernels(window_size):
+    window_size = int(window_size)
+    assert window_size % 2 == 0
 
     def kernel_fn(time, freq):
-        return np.exp(1j * (2 * np.pi * time * freq) / nfft)
+        return np.exp(1j * (2 * np.pi * time * freq) / window_size)
 
     kernels = np.fromfunction(
-        kernel_fn, (int(nfft), int(nfft / 2 + 1)), dtype=np.float64
+        kernel_fn, (int(window_size), int(window_size / 2 + 1)), dtype=np.float64
     )
 
     ac_cof = float(np.real(kernels[0, 0]))
@@ -136,6 +180,7 @@ def _get_istft_kernels(nfft):
     return real_kernels, imag_kernels, ac_cof
 
 
+# TODO move into tests
 if __name__ == "__main__":
 
     # test with MUSDB18
@@ -174,13 +219,18 @@ if __name__ == "__main__":
     subplot[0].set_xlim(0, nsamples)
     subplot[0].plot(range(nsamples), torch.t(thing).numpy()[0:nsamples])
     subplot[0].set_ylabel("Mix")
-    subplot[1].plot(range(window_width), np.transpose(magnitude.detach().numpy()[0, :, :, 0]))
+    subplot[1].plot(
+        range(window_width), np.transpose(magnitude.detach().numpy()[0, :, :, 0])
+    )
     subplot[1].set_ylabel("STFT Mix (Magnitude)")
     subplot[2].plot(
         range(window_width), np.transpose(phase.detach().numpy()[0, :, :, 0])
     )
     subplot[2].set_ylabel("STFT Mix (Phase)")
-    subplot[3].plot(range(reconstruction.shape[1]), torch.t(reconstruction.detach()).numpy()[0:nsamples])
+    subplot[3].plot(
+        range(reconstruction.shape[1]),
+        torch.t(reconstruction.detach()).numpy()[0:nsamples],
+    )
     subplot[3].set_ylabel("Reconstructed Mix (Phase)")
 
     plt.show()

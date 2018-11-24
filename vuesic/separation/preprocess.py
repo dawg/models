@@ -11,6 +11,8 @@ import torch
 import numpy as np
 from boto3.session import Session
 
+from utils.transforms import STFT
+
 ACCESS_KEY = "xxx"
 SECRET_KEY = "xxx"
 BUCKET_NAME = "vuesic-musdbd18"
@@ -50,7 +52,7 @@ class CallbackProgressBar(object):
         """
         Desc:
             Updates the progress bar
-            
+
         Args:
             update (int): Iterations completed since last update
         """
@@ -152,7 +154,14 @@ def write_stem_np(dst: str, fname: str, stem: object):
     np.save(os.path.join(dst, "vocals", fname), vocals)
 
 
-def write_stem_pt(dst: str, fname: str, stem: object):
+def write_stem_pt(
+    dst: str,
+    fname: str,
+    stem: object,
+    is_stft: bool = False,
+    window_size: int = 1024,
+    hop_size: int = 512,
+):
     """
     Desc:
         writes a stem as a .pth to dst with fname as the file name
@@ -165,17 +174,42 @@ def write_stem_pt(dst: str, fname: str, stem: object):
         stem (object): numpy array containing stem
     """
 
-    mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float16))
-    vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float16))
-
     fname += ".pth"
 
-    torch.save(mix, os.path.join(dst, "mix", fname))
-    torch.save(vocals, os.path.join(dst, "vocals", fname))
+    if is_stft:
+        mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float32))
+        vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float32))
+
+        stft = STFT(window_size=window_size, hop_size=hop_size)
+
+        mix = mix[:, :, 0]
+        vocals = vocals[:, :, 0]
+
+        # XXX maybe as an object instead of a tuple?
+        fmix = stft.forward(mix)
+        fvocals = stft.forward(vocals)
+
+        torch.save(fmix, os.path.join(dst, "mix", fname))
+        torch.save(fvocals, os.path.join(dst, "vocals", fname))
+
+    else:
+        mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float16))
+        vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float16))
+
+        torch.save(mix, os.path.join(dst, "mix", fname))
+        torch.save(vocals, os.path.join(dst, "vocals", fname))
 
 
 @logme.log
-def write(src: str, dst: str, asnp: bool = False, logger: object = None):
+def write(
+    src: str,
+    dst: str,
+    asnp: bool = False,
+    is_stft: bool = False,
+    window_size: int = 1024,
+    hop_size: int = 512,
+    logger: object = None,
+):
     """
     Desc: 
         writes the dataset as either a numpy file or a pytorch file
@@ -226,10 +260,17 @@ def write(src: str, dst: str, asnp: bool = False, logger: object = None):
 
                 stem, rate = stempeg.read_stems(sname)
 
-                if asnp:
+                if asnp and is_stft:
                     write_stem_np(dst, fname, stem)
                 else:
-                    write_stem_pt(dst, fname, stem)
+                    write_stem_pt(
+                        dst,
+                        fname,
+                        stem,
+                        is_stft=is_stft,
+                        window_size=window_size,
+                        hop_size=hop_size,
+                    )
 
     except Exception:
         logger.info(f"Removing {dst}")
@@ -253,9 +294,9 @@ def main():
     get_dataset(Set.TRAIN, path)
     get_dataset(Set.TEST, path)
 
-    # todo it's possible that we may want to convert to mono
-    write(os.path.join(DST, "train"), os.path.join(DST, "pt_train"))
-    write(os.path.join(DST, "test"), os.path.join(DST, "pt_test"))
+    # TODO try different window sizes (larger like 16384 or something)
+    write(os.path.join(DST, "train"), os.path.join(DST, "pt_f_train"), is_stft=True)
+    write(os.path.join(DST, "test"), os.path.join(DST, "pt_f_test"), is_stft=True)
 
 
 if __name__ == "__main__":

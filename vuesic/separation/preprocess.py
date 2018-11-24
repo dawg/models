@@ -50,6 +50,7 @@ class CallbackProgressBar(object):
         """
         Desc:
             Updates the progress bar
+            
         Args:
             update (int): Iterations completed since last update
         """

@@ -35,6 +35,9 @@ class Stem:
 class CallbackProgressBar(object):
     def __init__(self, total: int, unit: str = None):
         """
+        Desc:
+            Class that acts as a tqdm progress bar you can pass as a callback
+
         Args:
             total (int): Total number of iterations
 
@@ -45,6 +48,8 @@ class CallbackProgressBar(object):
 
     def __call__(self, update: int):
         """
+        Desc:
+            Updates the progress bar
         Args:
             update (int): Iterations completed since last update
         """
@@ -55,6 +60,13 @@ class CallbackProgressBar(object):
 @logme.log
 def download_dataset(key: str, dst: str, logger=None):
     """
+    Desc: 
+        Download the MUSDB18 dataset to dst from the s3 bucket described by the following 
+        ACCESS_KEY (string)
+        SECRET_KEY (string)
+        BUCKET_NAME (string)
+        OBJECT (string)
+
     Args:
         key (string): filename to be retrieved from our bucket
 
@@ -90,6 +102,9 @@ def download_dataset(key: str, dst: str, logger=None):
 @logme.log
 def get_dataset(set: str, path: str = None, logger: object = None):
     """
+    Desc:
+        Retrieve the dataset. If it isn't available, download it
+
     Args:
         set (string): filename to be retrieved from our bucket
 
@@ -118,6 +133,9 @@ def get_dataset(set: str, path: str = None, logger: object = None):
 
 def write_stem_np(dst: str, fname: str, stem: object):
     """
+    Desc:
+        writes a stem as a .np to dst with fname as the file name
+
     Args:
         dst (string): download directory
 
@@ -135,6 +153,9 @@ def write_stem_np(dst: str, fname: str, stem: object):
 
 def write_stem_pt(dst: str, fname: str, stem: object):
     """
+    Desc:
+        writes a stem as a .pth to dst with fname as the file name
+
     Args:
         dst (string): download directory
 
@@ -155,6 +176,9 @@ def write_stem_pt(dst: str, fname: str, stem: object):
 @logme.log
 def write(src: str, dst: str, asnp: bool = False, logger: object = None):
     """
+    Desc: 
+        writes the dataset as either a numpy file or a pytorch file
+
     Args:
         src (string): directory containing raw samples
 
@@ -228,6 +252,7 @@ def main():
     get_dataset(Set.TRAIN, path)
     get_dataset(Set.TEST, path)
 
+    # todo it's possible that we may want to convert to mono
     write(os.path.join(DST, "train"), os.path.join(DST, "pt_train"))
     write(os.path.join(DST, "test"), os.path.join(DST, "pt_test"))
 

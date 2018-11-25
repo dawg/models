@@ -1,5 +1,5 @@
 # Models for Vuesic
-[![Build Status](https://travis-ci.org/vusic/models.svg?branch=master)](https://travis-ci.org/vusic/models)
+[![Build Status](https://travis-ci.org/dawg/models.svg?branch=master)](https://travis-ci.org/dawg/models)
 
 ## Setting up the project
 

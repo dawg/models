@@ -14,7 +14,8 @@ install:
   - pipenv --version
   - pipenv install --pre --dev --deploy
 
-script: 
+script:
+  - python seytup.py install
   - pipenv run check
   - pipenv run test
   

@@ -8,6 +8,7 @@ import scipy.signal
 
 # TODO add comments to the functions (amir)
 
+
 class STFT(nn.Module):
     def __init__(
         self, window_size: int = 1024, hop_size: int = 512, window: str = "hanning"

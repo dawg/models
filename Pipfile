@@ -19,6 +19,8 @@ scipy = "*"
 torch = "==0.4.1"
 torchvision = "*"
 "pyqt5" = "*"
+matplotlib = "*"
+ipykernel = "*"
 
 [requires]
 python_version = "3.6"

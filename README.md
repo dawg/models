@@ -1,6 +1,18 @@
 # Models for Vuesic
 [![Build Status](https://travis-ci.org/vusic/models.svg?branch=master)](https://travis-ci.org/vusic/models)
 
+## Setting up the project
+
+Install the dependencies using the following command:
+```
+pipenv install
+```
+
+Run the following setup script in the project root dirctory to fetch the packages:
+```
+python setup.py install
+```
+
 
 ## Environment
 Setup your environment using the following script:

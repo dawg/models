@@ -11,7 +11,7 @@ import torch
 import numpy as np
 from boto3.session import Session
 
-from utils.transforms import STFT
+from vusic.utils.transforms import STFT
 
 ACCESS_KEY = "xxx"
 SECRET_KEY = "xxx"

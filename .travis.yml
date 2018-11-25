@@ -15,7 +15,7 @@ install:
   - pipenv install --pre --dev --deploy
 
 script:
-  - python seytup.py install
+  - python dawg/models/seytup.py install
   - pipenv run check
   - pipenv run test
   

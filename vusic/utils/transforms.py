@@ -6,6 +6,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 import scipy.signal
 
+# TODO add comments to the functions (amir)
 
 class STFT(nn.Module):
     def __init__(
@@ -78,7 +79,7 @@ def _get_stft_kernels(window_size: int, window: str):
 
 
 class ISTFT(nn.Module):
-    def __init__(self, window_size=1024, hop_size=512):
+    def __init__(self, window_size: int = 1024, hop_size: int = 512):
         """
         Desc: 
             create an ISTFT object
@@ -112,14 +113,7 @@ class ISTFT(nn.Module):
             torch.from_numpy(trans_kernels[:, np.newaxis, np.newaxis, :]).float()
         )
 
-    def forward(self, magn, phase, ac):
-        """
-        Desc: 
-            Implementing the forward method from the nn.module to obtain
-            the ISFFT            
-
-        Args:
-        """
+    def forward(self, magn: torch.float, phase: torch.float, ac: torch.float):
         assert magn.size()[2] == phase.size()[2] == self.n_freq
         window_size = self.window_size
         hop = self.hop_size
@@ -144,7 +138,7 @@ class ISTFT(nn.Module):
         return output
 
 
-def _get_istft_kernels(window_size):
+def _get_istft_kernels(window_size: int):
     window_size = int(window_size)
     assert window_size % 2 == 0
 

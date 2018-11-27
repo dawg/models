@@ -6,8 +6,6 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 import scipy.signal
 
-# TODO add comments to the functions (amir)
-
 
 class STFT(nn.Module):
     def __init__(
@@ -38,6 +36,26 @@ class STFT(nn.Module):
         self.real_kernels, self.imag_kernels = _get_stft_kernels(window_size, window)
 
     def forward(self, sample: torch.float):
+        """
+        Desc: 
+            Compute the stft of the input sample
+
+        Args:
+            sample (torch.float): time domain signal
+
+        Returns:
+            Tuple containing a matrix of magnitude, phase and ac. 
+
+            magnitude (torch.float): matrix of windows self.window_size/2 wide representing magnitude
+
+            phase (torch.float): matrix of windows self.window_size/2 wide representing phase
+
+            ac (torch.float): first sample from every window
+
+        Note:
+            depending on the length if you take the stft and the istft of a signal, 
+            the result will be the original signal minus a couple samples
+        """
         sample = sample.unsqueeze(1)
         sample = sample.unsqueeze(1)
 
@@ -115,6 +133,21 @@ class ISTFT(nn.Module):
         )
 
     def forward(self, magn: torch.float, phase: torch.float, ac: torch.float):
+        """
+        Desc: 
+            Compute the stft of the input sample
+
+        Args:
+            magn (torch.float): matrix of windows self.window_size/2 wide representing magnitude
+
+            phase (torch.float): matrix of windows self.window_size/2 wide representing phase
+
+            ac (torch.float): first sample from every window
+
+        Returns:
+            sample (torch.float): time domain signal
+        """
+
         assert magn.size()[2] == phase.size()[2] == self.n_freq
         window_size = self.window_size
         hop = self.hop_size

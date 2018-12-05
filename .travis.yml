@@ -14,7 +14,7 @@ install:
   - pipenv --version
   - pipenv install --pre --dev --deploy
 
-script: 
+script:
   - pipenv run check
   - pipenv run test
   

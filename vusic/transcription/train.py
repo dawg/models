@@ -2,7 +2,7 @@ import os
 
 from magenta.models.nsynth.reader import NSynthDataset
 
-from vuesic.transcription import preprocess
+from vusic.transcription import preprocess
 
 
 def main():

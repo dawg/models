@@ -1,14 +1,22 @@
 language: python
+env:
+  global:
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+
 python:
   - "3.6"
 
 install:
-  - pip install pipenv
-  - pipenv install --pre --dev
+  - pip install --upgrade pip
+  - pip --version
+  - pip install pipenv==2018.10.9
+  - pipenv --version
+  - pipenv install --pre --dev --deploy
 
-script: 
-  - pipenv run black --check .
-  - pipenv run pytest testsample.py
+script:
+  - pipenv run check
+  - pipenv run test
   
 branch:
   - master

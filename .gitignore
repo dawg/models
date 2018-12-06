@@ -1,3 +1,4 @@
+#### Project Specific ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -102,3 +103,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Mac OSX
+.DS_Store
+
+# Vscode settings
+.vscode/settings.json

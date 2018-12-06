@@ -8,10 +8,28 @@ black = "*"
 pytest = "*"
 
 [packages]
-tensorflow = "*"
+soundfile = "*"
+numpy = "*"
+logme = "*"
+musdb = "*"
+"boto3" = "*"
+requests = "*"
+tqdm = "*"
+scipy = "*"
+torch = "==0.4.1"
+torchvision = "*"
+"pyqt5" = "*"
+matplotlib = "*"
+ipykernel = "*"
+vusic = {path = ".", editable = true}
 
 [requires]
 python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+format = "pipenv run black ."
+check = "pipenv run black --check ."
+test = "pipenv run pytest"

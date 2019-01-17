@@ -16,10 +16,10 @@ def main():
     print(f"done! Training set contains {len(train_ds)} samples.", end='\n\n')
 
     # create nn modules
-    rnn = RNN(training_settings['rnn_params']);
+    # rnn = RNN(training_settings['rnn_params']);
     
     # set up objective functions
-    obj1 = l2
+    # obj1 = l2
 
     # optimizer
 

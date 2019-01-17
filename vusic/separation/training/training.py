@@ -1,8 +1,8 @@
 import torch
 
 from vusic.utils.separation_dataset import SeparationDataset
-from vusic.utils.separation_settings import debug, hyper_params, 
-from vusic.separation.modules import rnn
+from vusic.utils.separation_settings import debug, hyper_params, training_settings
+from vusic.separation.modules import rnn_decoder, rnn_encoder
 
 def main():
     device = 'cuda' if not debug and torch.cuda.is_available() else 'cpu'
@@ -26,7 +26,7 @@ def main():
 
     # training in epochs
     for epoch in range(training_settings['epochs']):
-        print('hello')
+        print('hello training')
 
 if __name__ == '__main__':
     main()

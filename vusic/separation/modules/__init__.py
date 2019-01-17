@@ -1,1 +1,1 @@
-__all__ = ['rnn']
+__all__ = ['rnn_decoder', 'rnn_encoder']

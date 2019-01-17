@@ -1,1 +1,4 @@
-__all__ = ['rnn_decoder', 'rnn_encoder']
+from .rnn_encoder import RnnEncoder
+from .rnn_decoder import RnnDecoder
+
+__all__ = ["RnnDecoder", "RnnEncoder"]

@@ -65,5 +65,16 @@ class RnnDecoder(nn.Module):
             feed forward through RNN decoder
 
         Args:
-            encoder_out: output of the RNN encoder
+            encoder_out (torch.autograd.variable.Variable): output of the RNN encoder
         """
+
+        batch_size = encoder_out.size()[0]
+        seq_length = encoder_out.size()[1]
+        h_t_dec = torch.zeros(batch_size, self._input_dim).to(self._device)
+        h_j_dec = torch.zeros(batch_size, seq_length, self._input_dim).to(self._device)
+
+        for ts in range(seq_length):
+            h_t_dec = self.gru_dec(h_enc[:, ts, :], h_t_dec)
+            h_j_dec[:, ts, :] = h_t_dec
+
+        return h_j_dec

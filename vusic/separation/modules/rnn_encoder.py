@@ -24,8 +24,10 @@ class RnnEncoder(nn.Module):
         self.gru_enc_f = nn.GRUCell(self.in_dim, self.in_dim)
         self.gru_enc_b = nn.GRUCell(self.in_dim, self.in_dim)
 
+        # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
+        # initialize weights
         self.init_w_b()
 
     def init_w_b(self):
@@ -58,12 +60,33 @@ class RnnEncoder(nn.Module):
         # init input hidden^2 backward bias
         self.gru_enc_b.bias_hh.data.zero_()
 
+    @classmethod
+    def from_params(cls, params):
+        """
+        Desc: 
+            create an RNN encoder from parameters
+
+        Args:
+            param (object): parameters for creating the RNN. Must contain the following
+                in_dim (int): shape of the input
+
+                context_length (int): length  
+
+                debug (bool): debug mode
+        """
+        # todo add defaults
+        return cls(params["in_dim"], params["context_length"], params["debug"])
+
     def forward(self, v_in):
-        """Forward pass.
-        :param v_in: The input to the RNN encoder of the Masker.
-        :type v_in: numpy.core.multiarray.ndarray
-        :return: The output of the RNN encoder of the Masker.
-        :rtype: torch.autograd.variable.Variable
+        """
+        Desc:
+            Forward pass through RNN encoder.
+
+        Args:
+            :param v_in: The input to the RNN encoder of the Masker.
+            :type v_in: numpy.core.multiarray.ndarray
+            :return: The output of the RNN encoder of the Masker.
+            :rtype: torch.autograd.variable.Variable
         """
         batch_size = v_in.size()[0]
         seq_length = v_in.size()[1]
@@ -90,17 +113,5 @@ class RnnEncoder(nn.Module):
 
         return h_enc
 
-    @classmethod
-    def from_params(cls, params):
-        """
-        Desc: 
-            create an RNN encoder from parameters
 
-        Args:
-            param (object): parameters for creating the RNN. Must contain the following
-                in_dim (int): shape of the input
-
-                debug (bool): debug mode
-        """
-        # todo add defaults
-        return cls(params["in_dim"], params["debug"])
+# EOF

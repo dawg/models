@@ -22,5 +22,9 @@ training_settings = {
     "epochs": 2 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
     "rnn_decoder_params": {"debug": debug, "in_dim": 12},
-    "rnn_encoder_params": {"debug": debug, "in_dim": stft_info["window_size"], "context_lenth":10},
+    "rnn_encoder_params": {
+        "debug": debug,
+        "in_dim": stft_info["window_size"],
+        "context_lenth": 10,
+    },
 }

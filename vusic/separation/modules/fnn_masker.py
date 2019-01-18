@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 
-__all__ = ['FnnMasker']
+__all__ = ["FnnMasker"]
+
 
 class FnnMasker(nn.Module):
     def __init__(self, in_dim, out_dim, context_length, debug):
@@ -25,11 +26,9 @@ class FnnMasker(nn.Module):
         self.context_length = context_length
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
-
         self.linear_layer = nn.Linear(self._input_dim, self._output_dim)
 
         self.init_w_b()
-
 
     def init_w_b(self):
         """
@@ -40,7 +39,7 @@ class FnnMasker(nn.Module):
         nn.init.xavier_normal_(self.linear_layer.weight)
 
         # init input linear bias
-        self.linear_layer.bias.data.zero_()      
+        self.linear_layer.bias.data.zero_()
 
     @classmethod
     def from_params(cls, params):
@@ -70,10 +69,11 @@ class FnnMasker(nn.Module):
             :return: The output of the AffineTransform of the masker
             :rtype: torch.autograd.variable.Variable
         """
-        v_in_prime = v_in[:, self._context_length:-self._context_length, :]
+        v_in_prime = v_in[:, self._context_length : -self._context_length, :]
         m_j = relu(self.linear_layer(h_j_dec))
         v_j_filt_prime = m_j.mul(v_in_prime)
 
         return v_j_filt_prime
+
 
 # EOF

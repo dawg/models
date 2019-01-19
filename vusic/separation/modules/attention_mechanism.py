@@ -18,6 +18,7 @@ class AttentionMechanism(nn.Module):
 
         # output dim
         self.linear_out = nn.Linear(in_dim*2, in_dim)
+        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
         
     def set_mask(self, mask):
@@ -55,6 +56,6 @@ class AttentionMechanism(nn.Module):
         # concat -> (batch, out_len, 2*dim)
         combined = torch.cat((mix, output), dim=2)
         # output -> (batch, out_len, dim)
-        output = F.tanh(self.linear_out(combined.view(-1, 2 * hidden_size))).view(batch_size, -1, hidden_size)
+        output = nn.functional.tanh(self.linear_out(combined.view(-1, 2 * hidden_size))).view(batch_size, -1, hidden_size)
 
         return output, attn

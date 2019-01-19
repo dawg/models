@@ -21,8 +21,8 @@ class FnnMasker(nn.Module):
         """
         super(FnnMasker, self).__init__()
 
-        self.in_dim = input_dim
-        self.out_dim = output_dim
+        self.in_dim = in_dim
+        self.out_dim = out_dim
         self.context_length = context_length
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 

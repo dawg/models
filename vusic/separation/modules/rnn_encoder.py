@@ -27,7 +27,7 @@ class RnnEncoder(nn.Module):
         # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
-        # initialize weights
+        # initialize weights and biases
         self.init_w_b()
 
     def init_w_b(self):
@@ -70,7 +70,7 @@ class RnnEncoder(nn.Module):
             param (object): parameters for creating the RNN. Must contain the following
                 in_dim (int): shape of the input
 
-                context_length (int): length  
+                context_length (int): length 
 
                 debug (bool): debug mode
         """

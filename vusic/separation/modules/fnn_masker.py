@@ -62,12 +62,13 @@ class FnnMasker(nn.Module):
             Feed forward through FNN
 
         Args:
-            :param h_j_dec: The output from the RNN decoder
-            :type h_j_dec: torch.autograd.variable.Variable
-            :param v_in: The original magnitude spectrogram input
-            :type v_in: numpy.core.multiarray.ndarray
-            :return: The output of the AffineTransform of the masker
-            :rtype: torch.autograd.variable.Variable
+            h_j_dec (torch.autograd.variable.Variable): The output from the RNN decoder
+
+            v_in (numpy.core.multiarray.ndarray): The original magnitude spectrogram input
+
+        Returns:
+
+            The output of the AffineTransform of the masker (torch.autograd.variable.Variable)
         """
         v_in_prime = v_in[:, self._context_length : -self._context_length, :]
         m_j = relu(self.linear_layer(h_j_dec))

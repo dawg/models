@@ -22,6 +22,7 @@ torchvision = "*"
 matplotlib = "*"
 ipykernel = "*"
 vusic = {path = ".", editable = true}
+magenta = "*"
 
 [requires]
 python_version = "3.6"

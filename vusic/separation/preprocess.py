@@ -9,12 +9,8 @@ import botocore
 import stempeg
 import torch
 import numpy as np
-from boto3.session import Session
-
 from vusic.utils.transforms import STFT
 
-ACCESS_KEY = "xxx"
-SECRET_KEY = "xxx"
 BUCKET_NAME = "vuesic-musdbd18"
 OBJECT = "musdb18.zip"
 HOME = os.path.expanduser("~")
@@ -33,7 +29,7 @@ class Stem:
     OTHER = (3,)
     VOCALS = (4,)
 
-
+# TODO switch to use utility from utils.dataset_downloader.py
 class CallbackProgressBar(object):
     def __init__(self, total: int, unit: str = None):
         """
@@ -65,8 +61,6 @@ def download_dataset(key: str, dst: str, logger=None):
     """
     Desc: 
         Download the MUSDB18 dataset to dst from the s3 bucket described by the following 
-        ACCESS_KEY (string)
-        SECRET_KEY (string)
         BUCKET_NAME (string)
         OBJECT (string)
 
@@ -83,11 +77,7 @@ def download_dataset(key: str, dst: str, logger=None):
 
         logger.info("Download started")
 
-        session = Session(
-            aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY
-        )
-
-        bucket = session.resource("s3").Bucket(BUCKET_NAME)
+        bucket = boto3.resource("s3").Bucket(BUCKET_NAME)
 
         pbar = CallbackProgressBar(
             bucket.Object(key).get()["ContentLength"], unit="bytes"

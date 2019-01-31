@@ -22,6 +22,7 @@ torchvision = "*"
 matplotlib = "*"
 ipykernel = "*"
 vusic = {path = ".", editable = true}
+python-rtmidi = "*"
 magenta = "*"
 
 [requires]

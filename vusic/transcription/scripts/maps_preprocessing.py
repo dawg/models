@@ -39,10 +39,9 @@ def generate_training_set(unzipped_dir: str):
     # TODO Make writer, but for now...
     dst = os.path.expanduser("~")
     dst = os.path.join(dst, "storage", "transcription")
-    if not os.path.isdir(dst):
-        print(f"Creating {dst}")
-        os.mkdir(dst)
+    if os.path.isdir(dst):
         dst = os.path.join(dst, "training")
+        print(f"Creating training folder {dst}")
         os.mkdir(dst)
 
     train_file_pairs = []
@@ -57,7 +56,13 @@ def generate_training_set(unzipped_dir: str):
             base_name_root, _ = os.path.splitext(f)
             mid_file = base_name_root + ".mid"
             train_file_pairs.append((f, mid_file))
-
+    
+    # Create tensors
+    for tfp in train_file_pairs:
+        wav_data, wav_sample_rate = torchaudio.load(tfp[0])
+        mid_data, mid_sample_rate = torchaudio.load(tfp[1])
+        torch.save(wav_data,FILENAME )    
+        
 
 def main():
 

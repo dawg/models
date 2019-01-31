@@ -22,8 +22,6 @@ torchvision = "*"
 matplotlib = "*"
 ipykernel = "*"
 vusic = {path = ".", editable = true}
-python-rtmidi = "*"
-magenta = "*"
 
 [requires]
 python_version = "3.6"

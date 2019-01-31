@@ -75,6 +75,3 @@ class FnnMasker(nn.Module):
         v_j_filt_prime = m_j.mul(v_in_prime)
 
         return v_j_filt_prime
-
-
-# EOF

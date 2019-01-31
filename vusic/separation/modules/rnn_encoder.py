@@ -112,6 +112,3 @@ class RnnEncoder(nn.Module):
                 h_enc[:, t - self._context_length, :] = h_t
 
         return h_enc
-
-
-# EOF

@@ -10,6 +10,8 @@ import stempeg
 import torch
 import numpy as np
 from vusic.utils.transforms import STFT
+from vusic.utils.separation_settings import preprocess_settings, stft_info
+
 
 BUCKET_NAME = "vuesic-musdbd18"
 OBJECT = "musdb18.zip"
@@ -149,8 +151,8 @@ def write_stem_pt(
     fname: str,
     stem: object,
     is_stft: bool = False,
-    window_size: int = 1024,
-    hop_size: int = 512,
+    window_size: int = 4046,
+    hop_size: int = 2048,
 ):
     """
     Desc:
@@ -196,8 +198,8 @@ def write(
     dst: str,
     asnp: bool = False,
     is_stft: bool = False,
-    window_size: int = 1024,
-    hop_size: int = 512,
+    window_size: int = 4094,
+    hop_size: int = 2048,
     logger: object = None,
 ):
     """
@@ -284,9 +286,20 @@ def main():
     get_dataset(Set.TRAIN, path)
     get_dataset(Set.TEST, path)
 
-    # TODO try different window sizes (larger like 16384 or something)
-    write(os.path.join(DST, "train"), os.path.join(DST, "pt_f_train"), is_stft=True)
-    write(os.path.join(DST, "test"), os.path.join(DST, "pt_f_test"), is_stft=True)
+    write(
+        os.path.join(DST, "train"),
+        os.path.join(DST, "pt_f_train"),
+        window_size=stft_info["window_size"],
+        hop_size=stft_info["hop_size"],
+        is_stft=True,
+    )
+    write(
+        os.path.join(DST, "test"),
+        os.path.join(DST, "pt_f_test"),
+        window_size=stft_info["window_size"],
+        hop_size=stft_info["hop_size"],
+        is_stft=True,
+    )
 
 
 if __name__ == "__main__":

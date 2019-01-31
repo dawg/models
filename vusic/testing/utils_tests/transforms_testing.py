@@ -4,7 +4,9 @@ from torch.utils.data import Dataset
 import PyQt5
 import matplotlib.pyplot as plt
 
-import librosa
+import numpy as np
+
+import librosa.display
 
 
 from vusic.utils import STFT, ISTFT
@@ -80,35 +82,14 @@ if __name__ == "__main__":
     istft = ISTFT.from_params(stft_info)
 
     f_sample = stft.forward(sample)
-    print(f_sample.shape)
-    f_sample = istft.forward(sample)
-    print(f_sample.shape)
+    print(f"{f_sample.shape}")
+    sample = istft.forward(f_sample)
+    print(f"{sample.shape}")
 
 
-    # magnitude, phase, ac = stft.forward(Variable(thing))
-    # print(f"{magnitude.shape}, {phase.shape}, {ac.shape}")
-
-    # reconstruction = istft.forward(magnitude, phase, ac)
-    # print(f"{reconstruction.shape}")
-
-    # f, subplot = plt.subplots(4, sharex=True)
-
-    # subplot[0].set_title("Audio Sample: {}".format(train_ds.filenames[idx]))
-    # subplot[0].set_xlim(0, stft_info['win_length'])
-    # subplot[0].plot(range(nsamples), torch.t(f_sample).numpy()[0:nsamples])
-    # subplot[0].set_ylabel("Mix")
-    # subplot[1].plot(
-    #     range(window_width), np.transpose(magnitude.detach().numpy()[0, :, :, 0])
-    # )
-    # subplot[1].set_ylabel("STFT Mix (Magnitude)")
-    # subplot[2].plot(
-    #     range(window_width), np.transpose(phase.detach().numpy()[0, :, :, 0])
-    # )
-    # subplot[2].set_ylabel("STFT Mix (Phase)")
-    # subplot[3].plot(
-    #     range(reconstruction.shape[1]),
-    #     torch.t(reconstruction.detach()).numpy()[0:nsamples],
-    # )
-    # subplot[3].set_ylabel("Reconstructed Mix (Phase)")
-
-    # plt.show()
+    D = librosa.amplitude_to_db(np.abs(f_sample), ref=np.max)
+    plt.figure(1)
+    librosa.display.specshow(D, y_axis='log')
+    plt.colorbar(format='%+2.0f dB')
+    plt.title('Logarithmic Frequency Power Spectrogram')
+    plt.show()

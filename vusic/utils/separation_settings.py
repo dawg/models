@@ -12,7 +12,14 @@ debug = True
 
 HOME = os.path.expanduser("~")
 
-preprocess_settings = {}
+preprocess_settings = {
+    "pre_dst": os.path.join(HOME, "storage", "separation"),
+    "downloader": {
+        "bucket": "vuesic-musdbd18",
+        "dataset": "musdb18.zip",
+        "downloading_dst": os.path.join(HOME, "storage", "separation"),
+    },
+}
 
 stft_info = {"window_size": 1024, "hop_size": 512}
 

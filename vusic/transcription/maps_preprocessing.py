@@ -7,6 +7,7 @@ import tqdm
 import zipfile
 import boto3
 
+from vusic.utils.downloader import Downloader
 from magenta.music import audio_io
 from magenta.music import midi_io
 

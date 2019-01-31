@@ -56,7 +56,6 @@ class RnnDecoder(nn.Module):
 
                 debug (bool): debug mode
         """
-        # todo add defaults
         return cls(params["in_dim"], params["debug"])
 
     def forward(self, encoder_out):

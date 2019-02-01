@@ -21,7 +21,7 @@ preprocess_settings = {
     },
 }
 
-stft_info = {"window_size": 1024, "hop_size": 512}
+stft_info = {"n_fft": 4096, "win_length": 2049, "hop_length": 384}
 
 hyper_params = {}
 
@@ -31,7 +31,7 @@ training_settings = {
     "rnn_decoder_params": {"debug": debug, "in_dim": 12},
     "rnn_encoder_params": {
         "debug": debug,
-        "in_dim": stft_info["window_size"],
+        "in_dim": stft_info["win_length"],
         "context_lenth": 10,
     },
 }

@@ -21,8 +21,13 @@ torchvision = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
+<<<<<<< HEAD
 vusic = {path = ".",editable = true}
 botocore = "*"
+=======
+vusic = {path = ".", editable = true}
+librosa = "*"
+>>>>>>> ae1c8b3298a5d39aa4aa1fcae4e38d88d1d3b5e0
 
 [requires]
 python_version = "3.6"

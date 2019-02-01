@@ -17,13 +17,13 @@ from vusic.utils.transcription_settings import preprocess_settings
 
 test_dirs = ["ENSTDkCl/MUS", "ENSTDkCl/MUS"]
 train_dirs = [
-   "AkPnBcht/MUS",
-   "AkPnBsdf/MUS",
-   "AkPnCGdD/MUS",
-   "AkPnStgb/MUS",
-   "SptkBGAm/MUS",
-   "SptkBGCl/MUS",
-   "StbgTGd2/MUS",
+    "AkPnBcht/MUS",
+    "AkPnBsdf/MUS",
+    "AkPnCGdD/MUS",
+    "AkPnStgb/MUS",
+    "SptkBGAm/MUS",
+    "SptkBGCl/MUS",
+    "StbgTGd2/MUS",
 ]
 
 
@@ -56,13 +56,13 @@ def generate_training_set(unzipped_dir: str):
             base_name_root, _ = os.path.splitext(f)
             mid_file = base_name_root + ".mid"
             train_file_pairs.append((f, mid_file))
-    
+
     # Create tensors
     for tfp in train_file_pairs:
         wav_data, wav_sample_rate = torchaudio.load(tfp[0])
         mid_data, mid_sample_rate = torchaudio.load(tfp[1])
-        torch.save(wav_data,FILENAME )    
-        
+        torch.save(wav_data, FILENAME)
+
 
 def main():
 
@@ -75,6 +75,7 @@ def main():
 
     for d in test_dirs:
         downloader.get_dataset(d, dst)
+
 
 if __name__ == "__main__":
     main()

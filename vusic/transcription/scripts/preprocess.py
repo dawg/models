@@ -7,7 +7,7 @@ import logme
 import requests
 import tqdm
 
-from vusic.transcription import writer
+from vusic.transcription.scripts import writer
 
 
 class Set:

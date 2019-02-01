@@ -27,41 +27,44 @@ train_dirs = [
 ]
 
 
-def generate_training_set(unzipped_dir: str):
+def generate_training_set(dataset_path: str, dst: str = None):
     """
     Desc:
-        Generate the training tensors
+        Generate the training tensors from the data passed 
 
     Args:
-        unzipped_dir (string): Directory where unzipped data is located
-    """
+        dataset_path (string): Directory where unzipped data is located
 
-    # TODO Make writer, but for now...
-    dst = os.path.expanduser("~")
-    dst = os.path.join(dst, "storage", "transcription")
+        dst (optional, string): Path to the directory where the tensors should be created
+    """
+    if not os.path.exists(dataset_path):
+        raise FileNotFoundError(f"{dataset_path} does not exist!")
+
+    if not dst:
+        dst = os.path.expanduser("~")
+        dst = os.path.join(dst, "storage", "transcription")
+
     if os.path.isdir(dst):
         dst = os.path.join(dst, "training")
         print(f"Creating training folder {dst}")
         os.mkdir(dst)
 
-    train_file_pairs = []
     for d in train_dirs:
         # TODO define and point to directories
-        path = os.path.join(unzipped_dir, d)
+        path = os.path.join(dataset_path, d)
         path = os.path.join(path, "*.wav")
         wav_files = glob.glob(path)
 
         # find mid files
-        for f in wav_files:
+        for wav_file in wav_files:
             base_name_root, _ = os.path.splitext(f)
-            mid_file = base_name_root + ".mid"
-            train_file_pairs.append((f, mid_file))
+            midi_file = base_name_root + ".mid"
 
-    # Create tensors
-    for tfp in train_file_pairs:
-        wav_data, wav_sample_rate = torchaudio.load(tfp[0])
-        mid_data, mid_sample_rate = torchaudio.load(tfp[1])
-        torch.save(wav_data, FILENAME)
+            wav_data, wav_sample_rate = torchaudio.load(wav_file)
+            midi_data, midi_sample_rate = torchaudio.load(midi_file)
+
+            torch.save(wav_data, os.path.join(dst, wav_file, ".pt"))
+            torch.save(midi_data, os.path.join(dst, midi_file, ".pt"))
 
 
 def main():

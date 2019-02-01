@@ -52,12 +52,12 @@ class Downloader:
 
         def __call__(self, update: int):
             """
-          Desc:
-             Updates the progress bar
+            Desc:
+                Updates the progress bar
 
-          Args:
-             update (int): Iterations completed since last update
-          """
+            Args:
+                update (int): Iterations completed since last update
+            """
             with self.lock:
                 self.pbar.update(update)
 
@@ -94,16 +94,16 @@ class Downloader:
     @logme.log
     def get_dataset(self, directory: str, dst: str, logger: object = None):
         """
-       Desc:
-          Retrieve the dataset. If it isn't available, download it
+        Desc:
+            Retrieve the dataset. If it isn't available, download it
 
-          Args:
-             directory (string): directory to be retrieved from our bucket
+        Args:
+            directory (string): directory to be retrieved from our bucket
 
-             dst (string): destination to extrac the dataset to
+            dst (string): destination to extract the dataset to
 
-             logger (object, optional): logger
-       """
+            logger (object, optional): logger
+        """
 
         if not os.path.exists(dst):
             logger.info(f"Making {dst}")

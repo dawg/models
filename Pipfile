@@ -23,6 +23,7 @@ matplotlib = "*"
 ipykernel = "*"
 vusic = {path = ".",editable = true}
 botocore = "*"
+librosa = "*"
 
 [requires]
 python_version = "3.6"

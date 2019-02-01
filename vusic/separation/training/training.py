@@ -38,7 +38,7 @@ def main():
     # training in epochs
     for epoch in range(training_settings["epochs"]):
         for i, data in enumerate(dataloader):
-            print(f"Sample {i}: {sample['mix'][0].shape}")
+            print(f"Sample {i}: {sample['mix']['mg'].shape}")
 
 
 if __name__ == "__main__":

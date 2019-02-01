@@ -76,6 +76,5 @@ def main():
     for d in test_dirs:
         downloader.get_dataset(d, dst)
 
-
 if __name__ == "__main__":
     main()

@@ -108,8 +108,7 @@ class Downloader:
             logger.info(f"Making {dst}")
             os.makedirs(dst)
 
-        if path == None:
-            path = self.download_dataset(dst)
+        path = self.download_dataset(dst)
 
         with zipfile.ZipFile(path, "r") as z:
 

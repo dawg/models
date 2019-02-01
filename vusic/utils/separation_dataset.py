@@ -5,7 +5,7 @@ import os
 
 
 class SeparationDataset(Dataset):
-    def __init__(self, root_dir: str, transform: callable = None, asnp: bool = False):
+    def __init__(self, root_dir: str, transform: callable = None):
         """
         Args:
             root_dir (string): Directory with the mix and vocals directories. 
@@ -21,13 +21,30 @@ class SeparationDataset(Dataset):
         self.transform = transform
         self.asnp = asnp
 
-        suffix = ".npy" if asnp else ".pth"
+        suffix = ".pth"
 
         self.filenames = [
             name
             for name in os.listdir(os.path.join(root_dir, "mix"))
             if name.endswith(suffix)
         ]
+
+    @classmethod
+    def from_params(cls, params: object):
+        """
+        Desc: 
+            create a SeparationDataset from parameters
+
+        Args:
+            param (object): parameters for creating the SeparationDataset. Must contain the following
+                root_dir (str): root directory of the dataset
+
+                transform (optional, str): transform to be applied to each sample upon retrieval
+        """
+
+        transform = params["transform"] if "transform" in params else None
+
+        return cls(params["dataset"], params["transform"])
 
     def __len__(self):
         return len(self.filenames)
@@ -37,12 +54,8 @@ class SeparationDataset(Dataset):
         mixpath = os.path.join(self.root_dir, "mix", self.filenames[idx])
         vocalpath = os.path.join(self.root_dir, "vocals", self.filenames[idx])
 
-        if self.asnp:
-            mix = np.load(mixpath)
-            vocals = np.load(vocalpath)
-        else:
-            mix = torch.load(mixpath)
-            vocals = torch.load(vocalpath)
+        mix = torch.load(mixpath)
+        vocals = torch.load(vocalpath)
 
         sample = {"mix": mix, "vocals": vocals}
 

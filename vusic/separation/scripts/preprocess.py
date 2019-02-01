@@ -8,8 +8,9 @@ import botocore
 import stempeg
 import torch
 import numpy as np
+import librosa
 
-from vusic.utils.transforms import STFT
+from vusic.utils import STFT
 from vusic.utils.separation_settings import preprocess_settings, stft_info
 from vusic.utils import Downloader
 
@@ -27,13 +28,13 @@ class Stem:
     VOCALS = (4,)
 
 
+stft = STFT.from_params(stft_info)
+
 def write_stem_pt(
     dst: str,
     fname: str,
     stem: object,
     is_stft: bool = False,
-    window_size: int = 4046,
-    hop_size: int = 2048,
 ):
     """
     Desc:
@@ -50,17 +51,27 @@ def write_stem_pt(
     fname += ".pth"
 
     if is_stft:
-        mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float32))
-        vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float32))
-
-        stft = STFT(window_size=window_size, hop_size=hop_size)
+        mix = np.transpose(stem[Stem.MIX, :, :].astype(np.float32))
+        vocals = np.transpose(stem[Stem.VOCALS, :, :].astype(np.float32))
 
         mix = mix[:, :, 0]
         vocals = vocals[:, :, 0]
 
-        # XXX maybe as an object instead of a tuple?
+        mix = librosa.core.to_mono(mix)
+        vocals = librosa.core.to_mono(vocals)
+
         fmix = stft.forward(mix)
         fvocals = stft.forward(vocals)
+
+        fmix = {
+            "mg": torch.from_numpy(np.abs(fmix).astype(np.float16)), 
+            "ph": torch.from_numpy(np.angle(fmix).astype(np.float16))
+        }
+
+        fvocals = {
+            "mg": torch.from_numpy(np.abs(fvocals).astype(np.float16)), 
+            "ph": torch.from_numpy(np.angle(fvocals).astype(np.float16))
+        }
 
         torch.save(fmix, os.path.join(dst, "mix", fname))
         torch.save(fvocals, os.path.join(dst, "vocals", fname))
@@ -78,8 +89,6 @@ def write(
     src: str,
     dst: str,
     is_stft: bool = False,
-    window_size: int = 4094,
-    hop_size: int = 2048,
     logger: object = None,
 ):
     """
@@ -124,9 +133,11 @@ def write(
             if not os.path.exists(sname):
                 raise FileNotFoundError(f"{sname} not found")
 
-            if not os.path.exists(
+            checks = not os.path.exists(
                 os.path.join(dst, "vocals", fname + suffix)
-            ) and not os.path.exists(os.path.join(dst, "mix", fname + suffix)):
+            ) and not os.path.exists(os.path.join(dst, "mix", fname + suffix))
+
+            if checks:
 
                 stem, rate = stempeg.read_stems(sname)
 
@@ -135,8 +146,6 @@ def write(
                     fname,
                     stem,
                     is_stft=is_stft,
-                    window_size=window_size,
-                    hop_size=hop_size,
                 )
 
     except Exception:
@@ -147,7 +156,7 @@ def write(
 
 
 def main():
-    downloader = Downloader.from_params(preprocess_settings["downlader"])
+    downloader = Downloader.from_params(preprocess_settings["downloader"])
 
     dst = preprocess_settings["pre_dst"]
 
@@ -157,15 +166,11 @@ def main():
     write(
         os.path.join(dst, "train"),
         os.path.join(dst, "pt_f_train"),
-        window_size=stft_info["window_size"],
-        hop_size=stft_info["hop_size"],
         is_stft=True,
     )
     write(
         os.path.join(dst, "test"),
         os.path.join(dst, "pt_f_test"),
-        window_size=stft_info["window_size"],
-        hop_size=stft_info["hop_size"],
         is_stft=True,
     )
 

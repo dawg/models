@@ -8,7 +8,6 @@ import numpy as np
 
 import librosa.display
 
-
 from vusic.utils import STFT, ISTFT
 from vusic.utils.separation_settings import stft_info
 
@@ -73,19 +72,17 @@ if __name__ == "__main__":
     sample = train_ds[0]
     nsamples = 50000
 
-    print(f"{sample['mix'].shape}")
     sample = torch.t(sample["mix"][0,:,:])
     sample = librosa.core.to_mono(sample.numpy())
-    print(f"{sample.shape}")
+    print(f"Processing audio sample of size: {sample.shape}")
 
     stft = STFT.from_params(stft_info)
     istft = ISTFT.from_params(stft_info)
 
     f_sample = stft.forward(sample)
-    print(f"{f_sample.shape}")
+    print(f"Spectrum of sample has shape: {f_sample.shape}. window of {stft_info['win_length']} was used.")
     sample = istft.forward(f_sample)
-    print(f"{sample.shape}")
-
+    print(f"Shape of reconstructed signal {sample.shape}. Plotting spectrogram")
 
     D = librosa.amplitude_to_db(np.abs(f_sample), ref=np.max)
     plt.figure(1)

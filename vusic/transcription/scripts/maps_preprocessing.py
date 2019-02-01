@@ -34,24 +34,18 @@ def generate_training_set(exclude_ids):
     """
     train_file_pairs = []
     for d in train_dirs:
-        #TODO define and point to directories
+        # TODO define and point to directories
         path = os.path.join(input_dir, directory)
-        path = os.path.join(path, '*.wav')
+        path = os.path.join(path, "*.wav")
         wav_files = glob.glob(path)
-        
-
-
 
 
 def main():
     downloader = Downloader.from_params(preprocess_settings["downlader"])
-    
+
     dst = preprocess_settings["pre_dst"]
 
-
-
     downloader.get_dataset()
-
 
 
 if __name__ == "__main__":

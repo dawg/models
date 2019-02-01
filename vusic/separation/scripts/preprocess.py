@@ -30,12 +30,8 @@ class Stem:
 
 stft = STFT.from_params(stft_info)
 
-def write_stem_pt(
-    dst: str,
-    fname: str,
-    stem: object,
-    is_stft: bool = False,
-):
+
+def write_stem_pt(dst: str, fname: str, stem: object, is_stft: bool = False):
     """
     Desc:
         writes a stem as a .pth to dst with fname as the file name
@@ -64,13 +60,13 @@ def write_stem_pt(
         fvocals = stft.forward(vocals)
 
         fmix = {
-            "mg": torch.from_numpy(np.abs(fmix).astype(np.float16)), 
-            "ph": torch.from_numpy(np.angle(fmix).astype(np.float16))
+            "mg": torch.from_numpy(np.abs(fmix).astype(np.float16)),
+            "ph": torch.from_numpy(np.angle(fmix).astype(np.float16)),
         }
 
         fvocals = {
-            "mg": torch.from_numpy(np.abs(fvocals).astype(np.float16)), 
-            "ph": torch.from_numpy(np.angle(fvocals).astype(np.float16))
+            "mg": torch.from_numpy(np.abs(fvocals).astype(np.float16)),
+            "ph": torch.from_numpy(np.angle(fvocals).astype(np.float16)),
         }
 
         torch.save(fmix, os.path.join(dst, "mix", fname))
@@ -85,12 +81,7 @@ def write_stem_pt(
 
 
 @logme.log
-def write(
-    src: str,
-    dst: str,
-    is_stft: bool = False,
-    logger: object = None,
-):
+def write(src: str, dst: str, is_stft: bool = False, logger: object = None):
     """
     Desc: 
         writes the dataset as either a numpy file or a pytorch file
@@ -141,12 +132,7 @@ def write(
 
                 stem, rate = stempeg.read_stems(sname)
 
-                write_stem_pt(
-                    dst,
-                    fname,
-                    stem,
-                    is_stft=is_stft,
-                )
+                write_stem_pt(dst, fname, stem, is_stft=is_stft)
 
     except Exception:
         logger.info(f"Removing {dst}")
@@ -163,16 +149,8 @@ def main():
     downloader.get_dataset(Set.TRAIN, dst)
     downloader.get_dataset(Set.TEST, dst)
 
-    write(
-        os.path.join(dst, "train"),
-        os.path.join(dst, "pt_f_train"),
-        is_stft=True,
-    )
-    write(
-        os.path.join(dst, "test"),
-        os.path.join(dst, "pt_f_test"),
-        is_stft=True,
-    )
+    write(os.path.join(dst, "train"), os.path.join(dst, "pt_f_train"), is_stft=True)
+    write(os.path.join(dst, "test"), os.path.join(dst, "pt_f_test"), is_stft=True)
 
 
 if __name__ == "__main__":

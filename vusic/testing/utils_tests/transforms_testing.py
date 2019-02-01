@@ -11,6 +11,7 @@ import librosa.display
 from vusic.utils import STFT, ISTFT
 from vusic.utils.separation_settings import stft_info
 
+
 class RawDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None, asnp: bool = False):
         """
@@ -59,6 +60,7 @@ class RawDataset(Dataset):
 
         return sample
 
+
 if __name__ == "__main__":
     HOME = os.path.expanduser("~")
     TEST = os.path.join(HOME, "storage", "separation", "pt_test")
@@ -72,7 +74,7 @@ if __name__ == "__main__":
     sample = train_ds[0]
     nsamples = 50000
 
-    sample = torch.t(sample["mix"][0,:,:])
+    sample = torch.t(sample["mix"][0, :, :])
     sample = librosa.core.to_mono(sample.numpy())
     print(f"Processing audio sample of size: {sample.shape}")
 
@@ -80,13 +82,15 @@ if __name__ == "__main__":
     istft = ISTFT.from_params(stft_info)
 
     f_sample = stft.forward(sample)
-    print(f"Spectrum of sample has shape: {f_sample.shape}. window of {stft_info['win_length']} was used.")
+    print(
+        f"Spectrum of sample has shape: {f_sample.shape}. window of {stft_info['win_length']} was used."
+    )
     sample = istft.forward(f_sample)
     print(f"Shape of reconstructed signal {sample.shape}. Plotting spectrogram")
 
     D = librosa.amplitude_to_db(np.abs(f_sample), ref=np.max)
     plt.figure(1)
-    librosa.display.specshow(D, y_axis='log')
-    plt.colorbar(format='%+2.0f dB')
-    plt.title('Logarithmic Frequency Power Spectrogram')
+    librosa.display.specshow(D, y_axis="log")
+    plt.colorbar(format="%+2.0f dB")
+    plt.title("Logarithmic Frequency Power Spectrogram")
     plt.show()

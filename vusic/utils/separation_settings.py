@@ -21,11 +21,7 @@ preprocess_settings = {
     },
 }
 
-stft_info = {
-    "n_fft": 4096, 
-    "win_length": 2049, 
-    "hop_length": 384
-}
+stft_info = {"n_fft": 4096, "win_length": 2049, "hop_length": 384}
 
 hyper_params = {}
 

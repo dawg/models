@@ -5,9 +5,7 @@ import torch.nn as nn
 
 
 class ISTFT(nn.Module):
-    def __init__(
-        self, n_fft, hop_length=None, win_length=None,
-    ):
+    def __init__(self, n_fft, hop_length=None, win_length=None):
         """
         Desc: 
             create an ISTFT object
@@ -35,7 +33,6 @@ class ISTFT(nn.Module):
         win_length = params["win_length"] if "win_length" in params else None
 
         return cls(params["n_fft"], hop_length=hop_length, win_length=win_length)
-    
 
     def forward(self, stft: np.ndarray):
         """

@@ -5,8 +5,7 @@ from .separation_dataset import SeparationDataset
 
 __all__ = [
     "STFT",
-    "ISTFT"
-    "Downloader",
+    "ISTFT" "Downloader",
     "SeparationDataset",
     "separation_settings",
     "transcription_settings",

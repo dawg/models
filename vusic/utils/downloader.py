@@ -6,6 +6,7 @@ import logme
 import tqdm
 import zipfile
 import boto3
+from botocore.client import Config
 import torch
 import threading
 
@@ -114,9 +115,9 @@ class Downloader:
         with zipfile.ZipFile(path, "r") as z:
 
             logger.info(f"Extracting files from {path}")
-            print('****' + directory + '****')
             for fname in tqdm.tqdm(z.namelist(), unit="Ex"):
                 if fname.startswith(directory) and not os.path.exists(os.path.join(dst, fname)):
+                    print("***" + fname + "***")
                     logger.info(f"file in {path}")
                     z.extractall(path=dst, members=[fname])
 

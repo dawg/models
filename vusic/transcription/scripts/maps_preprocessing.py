@@ -5,7 +5,6 @@ import torch
 import logme
 import tqdm
 import zipfile
-import boto3
 import torchaudio
 
 
@@ -15,15 +14,15 @@ from vusic.utils.downloader import Downloader
 # from magenta.music import midi_io
 from vusic.utils.transcription_settings import preprocess_settings
 
-test_dirs = ["ENSTDkCl/MUS", "ENSTDkCl/MUS"]
+test_dirs = ["MAPS/ENSTDkCl/MUS", "MAPS/ENSTDkCl/MUS"]
 train_dirs = [
-    "AkPnBcht/MUS",
-    "AkPnBsdf/MUS",
-    "AkPnCGdD/MUS",
-    "AkPnStgb/MUS",
-    "SptkBGAm/MUS",
-    "SptkBGCl/MUS",
-    "StbgTGd2/MUS",
+    "MAPS/AkPnBcht/MUS",
+    "MAPS/AkPnBsdf/MUS",
+    "MAPS/AkPnCGdD/MUS",
+    "MAPS/AkPnStgb/MUS",
+    "MAPS/SptkBGAm/MUS",
+    "MAPS/SptkBGCl/MUS",
+    "MAPS/StbgTGd2/MUS",
 ]
 
 
@@ -52,12 +51,14 @@ def generate_training_set(dataset_path: str, dst: str = None):
     for d in train_dirs:
         # TODO define and point to directories
         path = os.path.join(dataset_path, d)
-        path = os.path.join(path, "*.wav")
+        path = os.path.join(path, "/*.wav")
         wav_files = glob.glob(path)
 
+        print(path)
         # find mid files
         for wav_file in wav_files:
-            base_name_root, _ = os.path.splitext(f)
+            print(wav_file)
+            base_name_root, _ = os.path.splitext(wav_file)
             midi_file = base_name_root + ".mid"
 
             wav_data, wav_sample_rate = torchaudio.load(wav_file)
@@ -69,15 +70,17 @@ def generate_training_set(dataset_path: str, dst: str = None):
 
 def main():
 
-    downloader = Downloader.from_params(preprocess_settings["downloader"])
+   downloader = Downloader.from_params(preprocess_settings["downloader"])
 
-    dst = preprocess_settings["pre_dst"]
+   dst = preprocess_settings["pre_dst"]
 
-    for d in train_dirs:
-        downloader.get_dataset(d, dst)
+   for d in train_dirs:
+       downloader.get_dataset(d, dst)
 
-    for d in test_dirs:
-        downloader.get_dataset(d, dst)
+   for d in test_dirs:
+       downloader.get_dataset(d, dst)
+   
+   generate_training_set(dst)
 
 
 if __name__ == "__main__":

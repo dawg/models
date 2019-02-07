@@ -2,7 +2,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import numpy as np
 import os
-
+from vusic.utils.separation_settings import debug
 
 class SeparationDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None):
@@ -13,15 +13,14 @@ class SeparationDataset(Dataset):
         
             transform (callable, optional): Optional transform to be applied 
             on a sample.
-
-            asnp (bool): load as numpy arrays? Will save as pytorch tensor by default
         """
 
         self.root_dir = root_dir
         self.transform = transform
-        self.asnp = asnp
 
         suffix = ".pth"
+
+        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
         self.filenames = [
             name
@@ -56,6 +55,12 @@ class SeparationDataset(Dataset):
 
         mix = torch.load(mixpath)
         vocals = torch.load(vocalpath)
+
+        if debug:
+            mix['mg'] = mix['mg'].type(torch.float)
+            mix['ph'] = mix['ph'].type(torch.float)
+            vocals['mg'] = vocals['mg'].type(torch.float)
+            vocals['ph'] = vocals['ph'].type(torch.float)
 
         sample = {"mix": mix, "vocals": vocals}
 

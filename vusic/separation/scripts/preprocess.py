@@ -51,6 +51,7 @@ def write_stem_pt(dst: str, fname: str, stem: object, is_stft: bool = False):
         vocals = np.transpose(stem[Stem.VOCALS, :, :].astype(np.float32))
 
         mix = mix[:, :, 0]
+
         vocals = vocals[:, :, 0]
 
         mix = librosa.core.to_mono(mix)
@@ -60,13 +61,13 @@ def write_stem_pt(dst: str, fname: str, stem: object, is_stft: bool = False):
         fvocals = stft.forward(vocals)
 
         fmix = {
-            "mg": torch.from_numpy(np.abs(fmix).astype(np.float16)),
-            "ph": torch.from_numpy(np.angle(fmix).astype(np.float16)),
+            "mg": torch.from_numpy(np.abs(fmix).transpose().astype(np.float16)),
+            "ph": torch.from_numpy(np.angle(fmix).transpose().astype(np.float16)),
         }
 
         fvocals = {
-            "mg": torch.from_numpy(np.abs(fvocals).astype(np.float16)),
-            "ph": torch.from_numpy(np.angle(fvocals).astype(np.float16)),
+            "mg": torch.from_numpy(np.abs(fvocals).transpose().astype(np.float16)),
+            "ph": torch.from_numpy(np.angle(fvocals).transpose().astype(np.float16)),
         }
 
         torch.save(fmix, os.path.join(dst, "mix", fname))

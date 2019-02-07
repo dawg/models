@@ -8,89 +8,34 @@ import numpy as np
 
 import librosa.display
 
-from vusic.utils import STFT, ISTFT
+from vusic.utils import STFT, ISTFT, SeparationDataset
 from vusic.utils.separation_settings import stft_info
-
-
-class RawDataset(Dataset):
-    def __init__(self, root_dir: str, transform: callable = None, asnp: bool = False):
-        """
-        Args:
-            root_dir (string): Directory with the mix and vocals directories. 
-            This directory contains all of the sub folders
-        
-            transform (callable, optional): Optional transform to be applied 
-            on a sample.
-            
-            asnp (bool): load as numpy arrays? Will save as pytorch tensor by default
-        """
-
-        self.root_dir = root_dir
-        self.transform = transform
-        self.asnp = asnp
-
-        suffix = ".npy" if asnp else ".pth"
-
-        self.filenames = [
-            name
-            for name in os.listdir(os.path.join(root_dir, "mix"))
-            if name.endswith(suffix)
-        ]
-
-    def __len__(self):
-        return len(self.filenames)
-
-    def __getitem__(self, idx: int):
-
-        mixpath = os.path.join(self.root_dir, "mix", self.filenames[idx])
-        vocalpath = os.path.join(self.root_dir, "vocals", self.filenames[idx])
-
-        if self.asnp:
-            mix = np.load(mixpath)
-            vocals = np.load(vocalpath)
-        else:
-            # todo how does this compare to GPU?
-            mix = torch.load(mixpath).float()
-            vocals = torch.load(vocalpath).float()
-
-        sample = {"mix": mix, "vocals": vocals}
-
-        if self.transform:
-            sample = self.transform(sample)
-
-        return sample
 
 
 if __name__ == "__main__":
     HOME = os.path.expanduser("~")
-    TEST = os.path.join(HOME, "storage", "separation", "pt_test")
-    TRAIN = os.path.join(HOME, "storage", "separation", "pt_train")
-    train_ds = RawDataset(TRAIN)
-    test_ds = RawDataset(TEST)
+    TEST = os.path.join(HOME, "storage", "separation", "pt_f_test")
+    TRAIN = os.path.join(HOME, "storage", "separation", "pt_f_train")
+    train_ds = SeparationDataset(TRAIN)
+    # test_ds = SeparationDataset(TEST)
 
     print(f"Training set contains {len(train_ds)} samples.")
-    print(f"Testing set contains {len(test_ds)} samples.")
+    # print(f"Testing set contains {len(test_ds)} samples.")
 
     sample = train_ds[0]
-    nsamples = 50000
 
-    sample = torch.t(sample["mix"][0, :, :])
-    sample = librosa.core.to_mono(sample.numpy())
-    print(f"Processing audio sample of size: {sample.shape}")
+    f_sample = sample["mix"]
 
-    stft = STFT.from_params(stft_info)
-    istft = ISTFT.from_params(stft_info)
-
-    f_sample = stft.forward(sample)
-    print(
-        f"Spectrum of sample has shape: {f_sample.shape}. window of {stft_info['win_length']} was used."
-    )
-    sample = istft.forward(f_sample)
-    print(f"Shape of reconstructed signal {sample.shape}. Plotting spectrogram")
-
-    D = librosa.amplitude_to_db(np.abs(f_sample), ref=np.max)
+    D = librosa.amplitude_to_db(f_sample['mg'], ref=np.max)
     plt.figure(1)
     librosa.display.specshow(D, y_axis="log")
     plt.colorbar(format="%+2.0f dB")
-    plt.title("Logarithmic Frequency Power Spectrogram")
+    plt.title("Logarithmic Frequency Power Spectrogram of Mixture")
+    plt.show()
+
+    D = librosa.amplitude_to_db(sample["vocals"]["mg"], ref=np.max)
+    plt.figure(2)
+    librosa.display.specshow(D, y_axis="log")
+    plt.colorbar(format="%+2.0f dB")
+    plt.title("Logarithmic Frequency Power Spectrogram of ")
     plt.show()

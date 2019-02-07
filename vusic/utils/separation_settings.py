@@ -28,10 +28,15 @@ hyper_params = {}
 training_settings = {
     "epochs": 2 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
-    "rnn_decoder_params": {"debug": debug, "in_dim": 12},
+    "rnn_decoder_params": {
+        "debug": debug, 
+        "input_size": stft_info["win_length"]*2,
+    },
     "rnn_encoder_params": {
         "debug": debug,
-        "in_dim": stft_info["win_length"],
-        "context_lenth": 10,
+        "input_size": 744,
+        "context_length": 10,
+        "sequence_length": 60,
     },
+    "batch_size": 16,
 }

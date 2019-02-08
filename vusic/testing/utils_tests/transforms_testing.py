@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     f_sample = sample["mix"]
 
-    D = librosa.amplitude_to_db(f_sample['mg'], ref=np.max)
+    D = librosa.amplitude_to_db(f_sample["mg"], ref=np.max)
     plt.figure(1)
     librosa.display.specshow(D, y_axis="log")
     plt.colorbar(format="%+2.0f dB")

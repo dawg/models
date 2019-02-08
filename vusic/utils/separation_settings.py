@@ -40,13 +40,10 @@ training_settings = {
         "context_length": context_length,
         "sequence_length": 160,
     },
-    "rnn_decoder_params": {
-        "debug": debug, 
-        "input_size": preserved_bins*2,
-    },
-    "fnn_masker_params":{
+    "rnn_decoder_params": {"debug": debug, "input_size": preserved_bins * 2},
+    "fnn_masker_params": {
         "debug": debug,
-        "input_size": preserved_bins*2,
+        "input_size": preserved_bins * 2,
         "output_size": stft_info["win_length"],
         "context_length": context_length,
     },

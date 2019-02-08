@@ -4,6 +4,7 @@ import numpy as np
 import os
 from vusic.utils.separation_settings import debug
 
+
 class SeparationDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None):
         """
@@ -57,10 +58,10 @@ class SeparationDataset(Dataset):
         vocals = torch.load(vocalpath)
 
         if debug:
-            mix['mg'] = mix['mg'].type(torch.float)
-            mix['ph'] = mix['ph'].type(torch.float)
-            vocals['mg'] = vocals['mg'].type(torch.float)
-            vocals['ph'] = vocals['ph'].type(torch.float)
+            mix["mg"] = mix["mg"].type(torch.float)
+            mix["ph"] = mix["ph"].type(torch.float)
+            vocals["mg"] = vocals["mg"].type(torch.float)
+            vocals["ph"] = vocals["ph"].type(torch.float)
 
         sample = {"mix": mix, "vocals": vocals}
 

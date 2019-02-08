@@ -22,8 +22,7 @@ class RnnDecoder(nn.Module):
         # todo: make this rectangular as opposed to square?
         # create gated recurrent unit cells in the shape of our input
         self.gru = nn.GRUCell(self.input_size, self.input_size)
-        
-        
+
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
         self.init_w_b()
@@ -72,7 +71,9 @@ class RnnDecoder(nn.Module):
         batch_size = m_enc.size()[0]
         sequence_length = m_enc.size()[1]
         m_h_dec = torch.zeros(batch_size, self.input_size).to(self.device)
-        m_dec = torch.zeros(batch_size, sequence_length, self.input_size).to(self.device)
+        m_dec = torch.zeros(batch_size, sequence_length, self.input_size).to(
+            self.device
+        )
 
         for t in range(sequence_length):
             m_h_dec = self.gru(m_enc[:, t, :], m_h_dec)

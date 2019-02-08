@@ -28,7 +28,7 @@ class RnnEncoder(nn.Module):
 
         # init forward RNN
         self.gru_enc_f = nn.GRUCell(input_size=self.input_size, hidden_size=744)
-       
+
         # init backward RNN
         self.gru_enc_b = nn.GRUCell(input_size=self.input_size, hidden_size=744)
 
@@ -83,7 +83,12 @@ class RnnEncoder(nn.Module):
                 debug (bool): debug mode
         """
         # todo add defaults
-        return cls(params["input_size"], params["context_length"], params["sequence_length"], params["debug"])
+        return cls(
+            params["input_size"],
+            params["context_length"],
+            params["sequence_length"],
+            params["debug"],
+        )
 
     def forward(self, windows):
         """
@@ -110,18 +115,23 @@ class RnnEncoder(nn.Module):
         ).to(self.device)
 
         # remove some windows
-        windows_reduced = windows[:, :, :self.input_size]
+        windows_reduced = windows[:, :, : self.input_size]
 
         for t in range(sequence_length):
-            
+
             forward_t = self.gru_enc_f((windows_reduced[:, t, :]), forward_t)
-            backward_t = self.gru_enc_b((windows_reduced[:, sequence_length - t - 1, :]), backward_t)
+            backward_t = self.gru_enc_b(
+                (windows_reduced[:, sequence_length - t - 1, :]), backward_t
+            )
 
             if self.context_length <= t < sequence_length - self.context_length:
-                m_h_enc = torch.cat([
-                    forward_t + windows_reduced[:, t, :], 
-                    backward_t + windows_reduced[:, sequence_length - t - 1, :]
-                    ], dim=1)
+                m_h_enc = torch.cat(
+                    [
+                        forward_t + windows_reduced[:, t, :],
+                        backward_t + windows_reduced[:, sequence_length - t - 1, :],
+                    ],
+                    dim=1,
+                )
 
                 m_enc[:, t - self.context_length, :] = m_h_enc
 

@@ -113,7 +113,6 @@ class Downloader:
 
         with zipfile.ZipFile(path, "r") as z:
 
-
             logger.info(f"Extracting files from {path}")
             for fname in tqdm.tqdm(z.namelist(), unit="Ex"):
                 if fname.startswith(directory) and not os.path.exists(

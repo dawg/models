@@ -51,7 +51,12 @@ class FnnMasker(nn.Module):
             param (object): parameters for creating the FNN. See constructor for ingredients
         """
         # todo add defaults
-        return cls(params["input_size"], params['output_size'], params['context_length'], params["debug"])
+        return cls(
+            params["input_size"],
+            params["output_size"],
+            params["context_length"],
+            params["debug"],
+        )
 
     def forward(self, m_dec, mix_mg_sequence):
         """
@@ -67,7 +72,9 @@ class FnnMasker(nn.Module):
 
             The output of the AffineTransform of the masker (torch.autograd.variable.Variable)
         """
-        mix_mg_sequence_prime = mix_mg_sequence[:, self.context_length : -self.context_length, :]
+        mix_mg_sequence_prime = mix_mg_sequence[
+            :, self.context_length : -self.context_length, :
+        ]
         m_j = nn.functional.relu(self.linear_layer(m_dec))
         m_masked = m_j.mul(mix_mg_sequence_prime)
 

@@ -30,7 +30,7 @@ def main():
     print(f"-- Initializing NN modules...", end="")
     rnn_encoder = RnnEncoder.from_params(training_settings["rnn_encoder_params"])
     rnn_decoder = RnnDecoder.from_params(training_settings["rnn_decoder_params"])
-    # fnn_masker = FnnMasker.from_params(training_settings["fnn_masker_params"])
+    fnn_masker = FnnMasker.from_params(training_settings["fnn_masker_params"])
     print(f"done!", end="\n\n")
 
     # set up objective functions
@@ -44,6 +44,7 @@ def main():
     print(f"done!", end="\n\n")
 
     sequence_length = training_settings["rnn_encoder_params"]["sequence_length"]
+    context_length = training_settings["rnn_encoder_params"]["sequence_length"]
 
     # training in epochs
 
@@ -88,6 +89,12 @@ def main():
                 m_dec = rnn_decoder(m_enc)
 
                 print(f"after decoder: {m_dec.shape}")
+
+                m_masked = fnn_masker(m_dec, mix_mg_sequence)
+
+                print(f"after masker: {m_masked.shape}")
+
+                exit()
 
                 # feed through twinnet?
 

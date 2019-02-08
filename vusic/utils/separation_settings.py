@@ -28,18 +28,27 @@ hyper_params = {}
 # amount of bins we want to preserve
 preserved_bins = 744
 
+# context length for RNNs
+context_length = 10
+
 training_settings = {
     "epochs": 2 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
+    "rnn_encoder_params": {
+        "debug": debug,
+        "input_size": preserved_bins,
+        "context_length": context_length,
+        "sequence_length": 160,
+    },
     "rnn_decoder_params": {
         "debug": debug, 
         "input_size": preserved_bins*2,
     },
-    "rnn_encoder_params": {
+    "fnn_masker_params":{
         "debug": debug,
-        "input_size": preserved_bins,
-        "context_length": 10,
-        "sequence_length": 60,
+        "input_size": preserved_bins*2,
+        "output_size": stft_info["win_length"],
+        "context_length": context_length,
     },
     "batch_size": 16,
 }

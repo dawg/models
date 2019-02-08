@@ -27,10 +27,10 @@ class RnnEncoder(nn.Module):
         self.sequence_length = sequence_length
 
         # init forward RNN
-        self.gru_enc_f = nn.GRUCell(input_size=self.input_size, hidden_size=self.input_size)
+        self.gru_enc_f = nn.GRUCell(input_size=self.input_size, hidden_size=744)
        
         # init backward RNN
-        self.gru_enc_b = nn.GRUCell(input_size=self.input_size, hidden_size=self.input_size)
+        self.gru_enc_b = nn.GRUCell(input_size=self.input_size, hidden_size=744)
 
         # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
@@ -91,37 +91,38 @@ class RnnEncoder(nn.Module):
             Forward pass through RNN encoder.
 
         Args:
-            windows (torch.float[seq_length, window size]): Set of batch_size frequency windows.
+            windows (torch.float[seq_length, window size > ]): Set of batch_size frequency windows.
  
             The output of the RNN encoder of the Masker.
             
         """
 
-        sequence_length = windows.size()[0]
+        print(f"windows {windows.shape}")
 
-        forward_t = torch.zeros(sequence_length, self.input_size).to(self.device)
-        backward_t = torch.zeros(sequence_length, self.input_size).to(self.device)
+        batch_size = windows.size()[0]
+        seq_length = windows.size()[1]
+
+        forward_t = torch.zeros(batch_size, self.input_size).to(self.device)
+        backward_t = torch.zeros(batch_size, self.input_size).to(self.device)
 
         encoded_t = torch.zeros(
-            sequence_length, self.input_size - (2 * self.context_length),  2 * self.input_size
+            batch_size, seq_length - (2 * self.context_length), 2 * self.input_size
         ).to(self.device)
 
         # remove some windows
-        windows_reduced = windows[:, :self.input_size]
+        windows_reduced = windows[:, :, :self.input_size]
 
-        print(f"win red: {windows_reduced.size(1)}, forward: {(windows_reduced[t, :]).shape}")
+        for t in range(seq_length):
+            
+            forward_t = self.gru_enc_f((windows_reduced[:, t, :]), forward_t)
+            backward_t = self.gru_enc_b((windows_reduced[:, seq_length - t - 1, :]), backward_t)
 
-        for t in range(sequence_length):
-            # feed forward and backwards through our birnn
-            forward_t = self.gru_enc_f((windows_reduced[t, :]), forward_t)
-            backward_t = self.gru_enc_b((windows_reduced[sequence_length - t - 1, :]), backward_t)
+            if self.context_length <= t < seq_length - self.context_length:
+                h_encoded_t = torch.cat([
+                    forward_t + windows_reduced[:, t, :], 
+                    backward_t + windows_reduced[:, seq_length - t - 1, :]
+                    ], dim=1)
 
-
-            if self.context_length <= t < sequence_length - self.context_length:
-                encoded_t = torch.cat(
-                    [forward_t + windows_reduced[t, :], backward_t + windows_reduced[sequence_length - t - 1, :]],
-                    dim=1,
-                )
-                encoded_t[t - self.context_length, :] = encoded_t
+                encoded_t[:, t - self.context_length, :] = h_encoded_t
 
         return encoded_t

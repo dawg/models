@@ -1,8 +1,10 @@
+import math
+
 import torch
 from torch.utils.data import DataLoader
 
 from vusic.utils.separation_dataset import SeparationDataset
-from vusic.utils.separation_settings import debug, hyper_params, training_settings
+from vusic.utils.separation_settings import debug, hyper_params, training_settings, stft_info
 from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker
 
 # :sunglasses:
@@ -41,52 +43,72 @@ def main():
     print(f"-- Creating optimizer...", end="")
     print(f"done!", end="\n\n")
 
+    sequence_length = training_settings["rnn_encoder_params"]["sequence_length"]
+
     # training in epochs
+
+    # tensors to hold sequence
+    mix_mg_sequence = torch.zeros(batch_size, sequence_length, stft_info["win_length"], dtype=torch.float);
+    vocal_mg_sequence = torch.zeros(batch_size, sequence_length, stft_info["win_length"], dtype=torch.float);
+
     for epoch in range(training_settings["epochs"]):
         for i, sample in enumerate(dataloader):
 
             print(f"Sample {i}: {sample['mix']['mg'].shape}")
 
-            mix_mg = sample['mix']['mg'][0, :, :]
-            vocal_mg = sample['vocals']['mg'][0, :, :]
+            mix_mg = sample['mix']['mg']
+            vocal_mg = sample['vocals']['mg']
 
-            # batch up our song
-            for sequence in range(int(mix_mg.shape[0])):
+            print(f"Mix mg: {mix_mg.shape}")
 
-                for batch in range(int()):
+            # chunk up our song into multiple sequences
+            for sequence in range(math.floor(mix_mg.shape[1]/(sequence_length * batch_size))):
+                sequence_start = sequence * sequence_length
+                sequence_end = (sequence+1) * sequence_length
+                # print(f"sequence end: {sequence_end}")
+                for batch in range(sequence_start, sequence_end):
 
                     batch_start = batch * batch_size
                     batch_end = (batch+1) * batch_size
 
-                    mix_mg_batch = mix_mg[batch_start:batch_end, :]
-                    vocal_mg_batch = vocal_mg[batch_start:batch_end, :]
+                    # print(f"Mix batch: {mix_mg[0, batch_start:batch_end, :].shape}")
 
-                    print(f"batch shape: {mix_mg_batch.shape}")
+                    mix_mg_sequence[:, batch, :] = mix_mg[0, batch_start:batch_end, :]
+                    vocal_mg_sequence[:, batch, :] = vocal_mg[0, batch_start:batch_end, :]
 
-                    # feed through masker
 
-                    m_enc = rnn_encoder(mix_mg_batch)
-                    m_dec = rnn_decoder(m_enc)
+                print(f"sequence shape: {mix_mg_sequence.shape}")
 
-                    # feed through twinnet?
+                # feed through masker
 
-                    # regularize twinnet output
+                m_enc = rnn_encoder(mix_mg_sequence)
 
-                    # feed through denoiser
+                print(f"after encoder: {m_enc.shape}")
 
-                    # init optimizer
+                m_dec = rnn_decoder(m_enc)
 
-                    # calculate losses
+                print(f"after decoder: {m_enc.shape}")
 
-                    # create objective
 
-                    # back propigation
+                # feed through twinnet?
 
-                    # gradient norm clipping
+                # regularize twinnet output
 
-                    # step through optimizer
+                # feed through denoiser
 
-                    # record losses
+                # init optimizer
+
+                # calculate losses
+
+                # create objective
+
+                # back propigation
+
+                # gradient norm clipping
+
+                # step through optimizer
+
+                # record losses
             
     # we are done training! save and record our model
 

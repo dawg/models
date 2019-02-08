@@ -87,8 +87,7 @@ def main():
 
                 m_dec = rnn_decoder(m_enc)
 
-                print(f"after decoder: {m_enc.shape}")
-
+                print(f"after decoder: {m_dec.shape}")
 
                 # feed through twinnet?
 

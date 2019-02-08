@@ -60,7 +60,7 @@ class RnnDecoder(nn.Module):
         """
         return cls(params["input_size"], params["debug"])
 
-    def forward(self, encoder_out):
+    def forward(self, m_enc):
         """
         Desc: 
             feed forward through RNN decoder
@@ -69,13 +69,13 @@ class RnnDecoder(nn.Module):
             encoder_out (torch.autograd.variable.Variable): output of the RNN encoder
         """
 
-        batch_size = encoder_out.size()[0]
+        batch_size = m_enc.size()[0]
         seq_length = encoder_out.size()[1]
         h_t_dec = torch.zeros(batch_size, self.input_size).to(self.device)
         h_j_dec = torch.zeros(batch_size, seq_length, self.input_size).to(self.device)
 
         for ts in range(seq_length):
             h_t_dec = self.gru(encoder_out[:, ts, :], h_t_dec)
-            h_j_dec[:, ts, :] = h_t_dec
+            m_enc[:, ts, :] = m_enc
 
-        return h_j_dec
+        return m_enc

@@ -70,12 +70,12 @@ class RnnDecoder(nn.Module):
         """
 
         batch_size = m_enc.size()[0]
-        seq_length = encoder_out.size()[1]
-        h_t_dec = torch.zeros(batch_size, self.input_size).to(self.device)
-        h_j_dec = torch.zeros(batch_size, seq_length, self.input_size).to(self.device)
+        sequence_length = m_enc.size()[1]
+        m_h_dec = torch.zeros(batch_size, self.input_size).to(self.device)
+        m_dec = torch.zeros(batch_size, sequence_length, self.input_size).to(self.device)
 
-        for ts in range(seq_length):
-            h_t_dec = self.gru(encoder_out[:, ts, :], h_t_dec)
-            m_enc[:, ts, :] = m_enc
+        for t in range(sequence_length):
+            m_h_dec = self.gru(m_enc[:, t, :], m_h_dec)
+            m_dec[:, t, :] = m_h_dec
 
-        return m_enc
+        return m_dec

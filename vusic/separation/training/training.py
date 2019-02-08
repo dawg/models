@@ -72,9 +72,9 @@ def main():
                     batch_end = (batch+1) * batch_size
 
                     # print(f"Mix batch: {mix_mg[0, batch_start:batch_end, :].shape}")
-
-                    mix_mg_sequence[:, batch, :] = mix_mg[0, batch_start:batch_end, :]
-                    vocal_mg_sequence[:, batch, :] = vocal_mg[0, batch_start:batch_end, :]
+                    # FIXME? Does this do what I think it does. It's getting late
+                    mix_mg_sequence[:, batch%sequence_length, :] = mix_mg[0, batch_start:batch_end, :]
+                    vocal_mg_sequence[:, batch%sequence_length, :] = vocal_mg[0, batch_start:batch_end, :]
 
 
                 print(f"sequence shape: {mix_mg_sequence.shape}")

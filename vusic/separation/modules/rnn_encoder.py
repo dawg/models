@@ -102,8 +102,6 @@ class RnnEncoder(nn.Module):
             
         """
 
-        print(f"windows {windows.shape}")
-
         batch_size = windows.size()[0]
         sequence_length = windows.size()[1]
 

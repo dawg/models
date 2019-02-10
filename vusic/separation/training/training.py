@@ -1,6 +1,10 @@
 import math
+import time
 
 import torch
+import torch.nn
+import torch.nn.functional as F
+import torch.optim as O
 from torch.utils.data import DataLoader
 
 from vusic.utils.separation_dataset import SeparationDataset
@@ -41,9 +45,15 @@ def main():
 
     # set up objective functions
     print(f"-- Creating objective functions...", end="")
-    print(f"done!", end="\n\n")
+    l2 = torch.nn.MSELoss()
 
-    # obj1 = l2
+    optimizer = O.Adam(
+        list(rnn_encoder.parameters())
+        + list(rnn_decoder.parameters())
+        + list(fnn_masker.parameters()),
+        lr=hyper_params["learning_rate"],
+    )
+    print(f"done!", end="\n\n")
 
     # optimizer
     print(f"-- Creating optimizer...", end="")
@@ -63,14 +73,17 @@ def main():
     )
 
     for epoch in range(training_settings["epochs"]):
+
+        epoch_masker_loss = []
+
+        epoch_start = time.time()
+
         for i, sample in enumerate(dataloader):
 
-            print(f"Sample {i}: {sample['mix']['mg'].shape}")
+            print(f"Sample {i}: {sample['mix']['mg'].size()}")
 
             mix_mg = sample["mix"]["mg"]
             vocal_mg = sample["vocals"]["mg"]
-
-            print(f"Mix mg: {mix_mg.shape}")
 
             # chunk up our song into multiple sequences
             for sequence in range(
@@ -78,46 +91,39 @@ def main():
             ):
                 sequence_start = sequence * sequence_length
                 sequence_end = (sequence + 1) * sequence_length
-                # print(f"sequence end: {sequence_end}")
                 for batch in range(sequence_start, sequence_end):
 
                     batch_start = batch * batch_size
                     batch_end = (batch + 1) * batch_size
 
-                    # print(f"Mix batch: {mix_mg[0, batch_start:batch_end, :].shape}")
-                    # FIXME? Does this do what I think it does. It's getting late
                     mix_mg_sequence[:, batch % sequence_length, :] = mix_mg[
                         0, batch_start:batch_end, :
                     ]
                     vocal_mg_sequence[:, batch % sequence_length, :] = vocal_mg[
                         0, batch_start:batch_end, :
                     ]
-
-                print(f"sequence shape: {mix_mg_sequence.shape}")
+                # XXX hax
+                vocal_mg_sequence_masked = vocal_mg_sequence[:, 10:-10, :]
 
                 # feed through masker
-
                 m_enc = rnn_encoder(mix_mg_sequence)
-
-                print(f"after encoder: {m_enc.shape}")
-
                 m_dec = rnn_decoder(m_enc)
-
-                print(f"after decoder: {m_dec.shape}")
-
                 m_masked = fnn_masker(m_dec, mix_mg_sequence)
 
-                print(f"after masker: {m_masked.shape}")
 
-                exit()
+                # init optimizer
+                optimizer.zero_grad()
 
+                # compute master loss (using KL divergence)
+                loss = l2(
+                    m_masked, vocal_mg_sequence_masked
+                )
+                loss.backward()
                 # feed through twinnet?
 
                 # regularize twinnet output
 
                 # feed through denoiser
-
-                # init optimizer
 
                 # calculate losses
 
@@ -128,11 +134,20 @@ def main():
                 # gradient norm clipping
 
                 # step through optimizer
+                optimizer.step()
 
                 # record losses
+                epoch_masker_loss.append(loss.item())
 
-    # we are done training! save and record our model
+            epoch_end = time.time()
 
+            print(f"epoch: {epoch}, masker_loss: {loss}, epoch time: {epoch_end - epoch_start}")
+            print(epoch_masker_loss)
+
+    # we are done training! save and record our model state
+    torch.save(rnn_encoder.state_dict(), output_paths['rnn_encoder'])
+    torch.save(rnn_decoder.state_dict(), output_states_path['rnn_decoder'])
+    torch.save(fnn_masker.state_dict(), output_states_path['fnn_masker'])
 
 if __name__ == "__main__":
     main()

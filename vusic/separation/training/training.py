@@ -132,6 +132,12 @@ def main():
                 # back propigation
 
                 # gradient norm clipping
+                torch.nn.utils.clip_grad_norm_(
+                    list(rnn_encoder.parameters()) +
+                    list(rnn_decoder.parameters()) +
+                    list(fnn_masker.parameters()),
+                    max_norm=hyper_params['max_grad_norm'], norm_type=2
+                )
 
                 # step through optimizer
                 optimizer.step()
@@ -139,15 +145,17 @@ def main():
                 # record losses
                 epoch_masker_loss.append(loss.item())
 
-            epoch_end = time.time()
+        epoch_end = time.time()
 
-            print(f"epoch: {epoch}, masker_loss: {loss}, epoch time: {epoch_end - epoch_start}")
-            print(epoch_masker_loss)
+        print(f"epoch: {epoch}, masker_loss: {loss}, epoch time: {epoch_end - epoch_start}")
+        print(epoch_masker_loss)
 
     # we are done training! save and record our model state
     torch.save(rnn_encoder.state_dict(), output_paths['rnn_encoder'])
     torch.save(rnn_decoder.state_dict(), output_states_path['rnn_decoder'])
     torch.save(fnn_masker.state_dict(), output_states_path['fnn_masker'])
+
+    torch.save(epoch_masker_loss, os.path.join("output", "masker_loss.pt"))
 
 if __name__ == "__main__":
     main()

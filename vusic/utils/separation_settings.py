@@ -23,7 +23,10 @@ preprocess_settings = {
 
 stft_info = {"n_fft": 4096, "win_length": 2049, "hop_length": 384}
 
-hyper_params = {"learning_rate": 1e-4}
+hyper_params = {
+    "learning_rate": 1e-4,
+    'max_grad_norm': .5,
+}
 
 # amount of bins we want to preserve
 preserved_bins = 744

@@ -5,24 +5,25 @@ __all__ = ["RnnDecoder"]
 
 
 class RnnDecoder(nn.Module):
-    def __init__(self, in_dim, debug):
+    def __init__(self, input_size, debug):
         """
         Desc: 
             create an RNN decoder
 
         Args:
-            in_dim (int): shape of the input
+            input_size (int): shape of the input
 
             debug (bool): debug mode
         """
         super(RnnDecoder, self).__init__()
 
-        self.in_dim = in_dim
-        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
+        self.input_size = input_size
 
         # todo: make this rectangular as opposed to square?
         # create gated recurrent unit cells in the shape of our input
-        self.gru = nn.GRUCell(self.in_dim, self.in_dim)
+        self.gru = nn.GRUCell(self.input_size, self.input_size)
+
+        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
         self.init_w_b()
 
@@ -52,13 +53,13 @@ class RnnDecoder(nn.Module):
 
         Args:
             param (object): parameters for creating the RNN. Must contain the following
-                in_dim (int): shape of the input
+                input_size (int): shape of the input
 
                 debug (bool): debug mode
         """
-        return cls(params["in_dim"], params["debug"])
+        return cls(params["input_size"], params["debug"])
 
-    def forward(self, encoder_out):
+    def forward(self, m_enc):
         """
         Desc: 
             feed forward through RNN decoder
@@ -67,13 +68,15 @@ class RnnDecoder(nn.Module):
             encoder_out (torch.autograd.variable.Variable): output of the RNN encoder
         """
 
-        batch_size = encoder_out.size()[0]
-        seq_length = encoder_out.size()[1]
-        h_t_dec = torch.zeros(batch_size, self._input_dim).to(self._device)
-        h_j_dec = torch.zeros(batch_size, seq_length, self._input_dim).to(self._device)
+        batch_size = m_enc.size()[0]
+        sequence_length = m_enc.size()[1]
+        m_h_dec = torch.zeros(batch_size, self.input_size).to(self.device)
+        m_dec = torch.zeros(batch_size, sequence_length, self.input_size).to(
+            self.device
+        )
 
-        for ts in range(seq_length):
-            h_t_dec = self.gru_dec(h_enc[:, ts, :], h_t_dec)
-            h_j_dec[:, ts, :] = h_t_dec
+        for t in range(sequence_length):
+            m_h_dec = self.gru(m_enc[:, t, :], m_h_dec)
+            m_dec[:, t, :] = m_h_dec
 
-        return h_j_dec
+        return m_dec

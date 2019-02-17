@@ -5,15 +5,15 @@ __all__ = ["FnnMasker"]
 
 
 class FnnMasker(nn.Module):
-    def __init__(self, in_dim, out_dim, context_length, debug):
+    def __init__(self, input_size, output_size, context_length, debug):
         """
         Desc:
             create a FNN for the Masker
 
         Args:
-            in_dim (int): shape of the input
+            input_size (int): shape of the input
 
-            out_dim (int): shape of the output
+            output_size (int): shape of the output
 
             context_length (int): the context length
 
@@ -21,12 +21,12 @@ class FnnMasker(nn.Module):
         """
         super(FnnMasker, self).__init__()
 
-        self.in_dim = in_dim
-        self.out_dim = out_dim
+        self.input_size = input_size
+        self.output_size = output_size
         self.context_length = context_length
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
-        self.linear_layer = nn.Linear(self._input_dim, self._output_dim)
+        self.linear_layer = nn.Linear(self.input_size, self.output_size)
 
         self.init_w_b()
 
@@ -45,18 +45,20 @@ class FnnMasker(nn.Module):
     def from_params(cls, params):
         """
         Desc: 
-            create an RNN decoder from parameters
+            create an FNN masker from parameters
 
         Args:
-            param (object): parameters for creating the RNN. Must contain the following
-                in_dim (int): shape of the input
-
-                debug (bool): debug mode
+            param (object): parameters for creating the FNN. See constructor for ingredients
         """
         # todo add defaults
-        return cls(params["in_dim"], params["debug"])
+        return cls(
+            params["input_size"],
+            params["output_size"],
+            params["context_length"],
+            params["debug"],
+        )
 
-    def forward(self, h_j_dec, v_in):
+    def forward(self, m_dec, mix_mg_sequence):
         """
         Desc:
             Feed forward through FNN
@@ -70,8 +72,10 @@ class FnnMasker(nn.Module):
 
             The output of the AffineTransform of the masker (torch.autograd.variable.Variable)
         """
-        v_in_prime = v_in[:, self._context_length : -self._context_length, :]
-        m_j = relu(self.linear_layer(h_j_dec))
-        v_j_filt_prime = m_j.mul(v_in_prime)
+        mix_mg_sequence_prime = mix_mg_sequence[
+            :, self.context_length : -self.context_length, :
+        ]
+        m_j = nn.functional.relu(self.linear_layer(m_dec))
+        m_masked = m_j.mul(mix_mg_sequence_prime)
 
-        return v_j_filt_prime
+        return m_masked

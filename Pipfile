@@ -16,13 +16,15 @@ musdb = "*"
 requests = "*"
 tqdm = "*"
 scipy = "*"
-torch = "==0.4.1"
+torch = "*"
 torchvision = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
-vusic = {path = ".", editable = true}
+vusic = {path = ".",editable = true}
+botocore = "*"
 librosa = "*"
+ffprobe = "*"
 
 [requires]
 python_version = "3.6"

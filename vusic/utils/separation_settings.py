@@ -23,21 +23,20 @@ preprocess_settings = {
 
 stft_info = {"n_fft": 4096, "win_length": 2049, "hop_length": 384}
 
-hyper_params = {
-    "learning_rate": 1e-4,
-    'max_grad_norm': .5,
-}
+hyper_params = {"learning_rate": 1e-4, "max_grad_norm": 0.5}
 
 # amount of bins we want to preserve
 preserved_bins = 744
 
 # context length for RNNs
 context_length = 10
+output_folder = "output"
 
 output_paths = {
-    "rnn_encoder": os.path.join("optput", "states", "rnn_encoder.pt"),
-    "rnn_decoder": os.path.join("optput", "states", "rnn_decoder.pt"),
-    "fnn_masker": os.path.join("optput", "states", "fnn_masker.pt"),
+    "output_folder": output_folder,
+    "rnn_encoder": os.path.join(output_folder, "rnn_encoder.pth"),
+    "rnn_decoder": os.path.join(output_folder, "rnn_decoder.pth"),
+    "fnn_masker": os.path.join(output_folder, "fnn_masker.pth"),
 }
 
 training_settings = {

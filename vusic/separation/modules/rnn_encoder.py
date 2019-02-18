@@ -6,7 +6,7 @@ __all__ = ["RnnEncoder"]
 
 
 class RnnEncoder(nn.Module):
-    def __init__(self, input_size, context_length, sequence_length, debug):
+    def __init__(self, input_size, context_length, debug):
         """
         Desc:
             create an RNN encoder
@@ -16,21 +16,22 @@ class RnnEncoder(nn.Module):
 
             context_length (int): the context length
 
-            sequence_length (int): the sequence length
-
             debug (bool): debug mode
         """
         super(RnnEncoder, self).__init__()
 
         self.input_size = input_size
         self.context_length = context_length
-        self.sequence_length = sequence_length
 
         # init forward RNN
-        self.gru_enc_f = nn.GRUCell(input_size=self.input_size, hidden_size=744)
+        self.gru_enc_f = nn.GRUCell(
+            input_size=self.input_size, hidden_size=self.input_size
+        )
 
         # init backward RNN
-        self.gru_enc_b = nn.GRUCell(input_size=self.input_size, hidden_size=744)
+        self.gru_enc_b = nn.GRUCell(
+            input_size=self.input_size, hidden_size=self.input_size
+        )
 
         # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
@@ -83,12 +84,7 @@ class RnnEncoder(nn.Module):
                 debug (bool): debug mode
         """
         # todo add defaults
-        return cls(
-            params["input_size"],
-            params["context_length"],
-            params["sequence_length"],
-            params["debug"],
-        )
+        return cls(params["input_size"], params["context_length"], params["debug"])
 
     def forward(self, windows):
         """
@@ -98,7 +94,8 @@ class RnnEncoder(nn.Module):
         Args:
             windows (torch.float[sequence_length, window size > ]): Set of batch_size frequency windows.
  
-            The output of the RNN encoder of the Masker.
+        Returns:
+            The output of the RNN encoder.
             
         """
 

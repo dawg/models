@@ -17,7 +17,7 @@ from vusic.utils.separation_settings import (
     output_paths,
 )
 
-from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker
+from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker, TwinReg, AffineTransform
 
 
 def main():
@@ -40,14 +40,25 @@ def main():
 
     # create nn modules
     print(f"-- Initializing NN modules...", end="")
-    rnn_encoder = RnnEncoder.from_params(training_settings["rnn_encoder_params"])
-    rnn_decoder = RnnDecoder.from_params(training_settings["rnn_decoder_params"])
-    fnn_masker = FnnMasker.from_params(training_settings["fnn_masker_params"])
+    # masker
+    rnn_encoder = RnnEncoder.from_params(training_settings["rnn_encoder_params"]).to(device)
+    rnn_decoder = RnnDecoder.from_params(training_settings["rnn_decoder_params"]).to(device)
+    fnn_masker = FnnMasker.from_params(training_settings["fnn_masker_params"]).to(device)
+    
+    # regularization networks
+    twin_decoder = TwinReg.from_params(training_settings["twin_decoder_params"]).to(device)
+    twin_masker = FnnMasker.from_params(training_settings["fnn_masker_params"]).to(device)
+
+    # affine transform
+    affine_transform = AffineTransform.from_params(training_settings["affine_transform_params"]).to(device)
+
     print(f"done!", end="\n\n")
 
     # set up objective functions
     print(f"-- Creating objective functions...", end="")
     l2 = torch.nn.MSELoss()
+
+
     print(f"done!", end="\n\n")
 
     # optimizer
@@ -55,13 +66,16 @@ def main():
     optimizer = O.Adam(
         list(rnn_encoder.parameters())
         + list(rnn_decoder.parameters())
-        + list(fnn_masker.parameters()),
+        + list(fnn_masker.parameters())
+        + list(twin_decoder.parameters())
+        + list(twin_masker.parameters())
+        + list(affine_transform.parameters()),
         lr=hyper_params["learning_rate"],
     )
     print(f"done!", end="\n\n")
 
-    sequence_length = training_settings["rnn_encoder_params"]["sequence_length"]
-    context_length = training_settings["rnn_encoder_params"]["sequence_length"]
+    sequence_length = training_settings["sequence_length"]
+    context_length = training_settings["rnn_encoder_params"]["context_length"]
 
     # training in epochs
 
@@ -109,13 +123,21 @@ def main():
                     vocal_mg_sequence[:, batch % sequence_length, :] = vocal_mg[
                         0, batch_start:batch_end, :
                     ]
-                # XXX hax
-                vocal_mg_sequence_masked = vocal_mg_sequence[:, 10:-10, :]
+
+                # trim our vocal sequence to match the output of our masker
+                vocal_mg_sequence_masked = vocal_mg_sequence[:, context_length:-context_length, :]
 
                 # feed through masker
                 m_enc = rnn_encoder(mix_mg_sequence)
                 m_dec = rnn_decoder(m_enc)
                 m_masked = fnn_masker(m_dec, mix_mg_sequence)
+
+                # feed through twinnet
+                m_t_dec = twin_decoder(m_enc)
+                m_t_masked = twin_masker(m_t_dec)
+
+                # regulatization
+                affine = affine_transform(m_dec)
 
                 # init optimizer
                 optimizer.zero_grad()
@@ -124,9 +146,8 @@ def main():
                 loss = l2(m_masked, vocal_mg_sequence_masked)
                 loss.backward()
 
-                # feed through twinnet?
-
                 # regularize twinnet output
+
 
                 # feed through denoiser
 

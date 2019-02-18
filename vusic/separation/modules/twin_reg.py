@@ -9,22 +9,24 @@ class TwinReg(nn.Module):
     def __init__(self, input_size, context_length, sequence_length, debug):
         """
         Desc:
-            create an RNN encoder
+            create a twindecoder
 
         Args:
             input_size (int): 
-
-            context_length (int): the context length
-
-            sequence_length (int): the sequence length
 
             debug (bool): debug mode
         """
         super(RnnEncoder, self).__init__()
 
-
-        # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
+
+        self.input_size = input_size
+
+        self.gru = nn.GRUCell(self.input_size, self.input_size)
+
+        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
+
+        self.init_w_b()
 
 
     def init_w_b(self):
@@ -32,7 +34,19 @@ class TwinReg(nn.Module):
             Desc: 
                 initialize weights and biases for the network
         """
-        pass
+
+        # init input hidden weights
+        nn.init.xavier_normal_(self.gru.weight_ih)
+
+        # init hidden^2 weights
+        nn.init.orthogonal_(self.gru.weight_hh)
+
+        # init input hidden bias
+        self.gru.bias_ih.data.zero_()
+
+        # init hidden^2 bias
+        self.gru.bias_hh.data.zero_()
+
 
     @classmethod
     def from_params(cls, params):
@@ -51,12 +65,10 @@ class TwinReg(nn.Module):
         # todo add defaults
         return cls(
             params["input_size"],
-            params["context_length"],
-            params["sequence_length"],
             params["debug"],
         )
 
-    def forward(self, layers):
+    def forward(self, m_enc):
         """
         Desc:
             Forward pass through Twin Net Regularizer.
@@ -64,5 +76,19 @@ class TwinReg(nn.Module):
         Args:
             
         """
+
+        batch_size = m_enc.size()[0]
+        sequence_length = m_enc.size()[1]
+        
+        m_h_dec = torch.zeros(batch_size, self.input_size).to(self.device)
+        m_dec = torch.zeros(batch_size, sequence_length, self.input_size).to(
+            self.device
+        )
+
+        for ts in range(sequence_length-1, -1, -1):
+            m_h_dec = self.gru(m_enc[:, ts, :], m_h_dec)
+            m_dec[:, t, :] = m_h_dec
+
+        return m_dec
 
         pass

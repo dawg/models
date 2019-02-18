@@ -42,18 +42,24 @@ output_paths = {
 training_settings = {
     "epochs": 2 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
+    "context_length": context_length,
+    "sequence_length": 60,
     "rnn_encoder_params": {
         "debug": debug,
         "input_size": preserved_bins,
         "context_length": context_length,
-        "sequence_length": 60,
     },
     "rnn_decoder_params": {"debug": debug, "input_size": preserved_bins * 2},
+    "twin_decoder_params": {"debug": debug,"input_size": } 
     "fnn_masker_params": {
         "debug": debug,
         "input_size": preserved_bins * 2,
         "output_size": stft_info["win_length"],
         "context_length": context_length,
+    },
+    "affine_transform_params": {
+        "debug": debug
+        "input_size": 
     },
     "batch_size": 16,
 }

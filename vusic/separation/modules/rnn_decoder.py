@@ -19,7 +19,6 @@ class RnnDecoder(nn.Module):
 
         self.input_size = input_size
 
-        # todo: make this rectangular as opposed to square?
         # create gated recurrent unit cells in the shape of our input
         self.gru = nn.GRUCell(self.input_size, self.input_size)
 

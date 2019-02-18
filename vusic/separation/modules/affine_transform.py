@@ -18,7 +18,7 @@ class AffineTransform(nn.Module):
         super(AffineTransform, self).__init__()
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
         self.input_size = input_size
-        self.linear_layer = Linear(self._input_dim, self._input_dim)
+        self.linear_layer = nn.Linear(self.input_size, self.input_size)
         self.init_w_b()
 
     def init_w_b(self):

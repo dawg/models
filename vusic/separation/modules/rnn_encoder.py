@@ -24,10 +24,14 @@ class RnnEncoder(nn.Module):
         self.context_length = context_length
 
         # init forward RNN
-        self.gru_enc_f = nn.GRUCell(input_size=self.input_size, hidden_size=self.input_size)
+        self.gru_enc_f = nn.GRUCell(
+            input_size=self.input_size, hidden_size=self.input_size
+        )
 
         # init backward RNN
-        self.gru_enc_b = nn.GRUCell(input_size=self.input_size, hidden_size=self.input_size)
+        self.gru_enc_b = nn.GRUCell(
+            input_size=self.input_size, hidden_size=self.input_size
+        )
 
         # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
@@ -80,11 +84,7 @@ class RnnEncoder(nn.Module):
                 debug (bool): debug mode
         """
         # todo add defaults
-        return cls(
-            params["input_size"],
-            params["context_length"],
-            params["debug"],
-        )
+        return cls(params["input_size"], params["context_length"], params["debug"])
 
     def forward(self, windows):
         """

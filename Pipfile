@@ -24,6 +24,7 @@ ipykernel = "*"
 vusic = {path = ".",editable = true}
 botocore = "*"
 librosa = "*"
+magenta = "*"
 
 [requires]
 python_version = "3.6"

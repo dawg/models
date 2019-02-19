@@ -6,6 +6,7 @@ import logme
 import tqdm
 import zipfile
 import torchaudio
+from magenta.models.onsets_frames_transcription.split_audio_and_label_data import find_split_points
 
 
 from vusic.utils.downloader import Downloader
@@ -54,10 +55,8 @@ def generate_training_set(dataset_path: str, dst: str = None):
         path = os.path.join(path, "/*.wav")
         wav_files = glob.glob(path)
 
-        print(path)
         # find mid files
         for wav_file in wav_files:
-            print(wav_file)
             base_name_root, _ = os.path.splitext(wav_file)
             midi_file = base_name_root + ".mid"
 

@@ -10,4 +10,5 @@ __all__ = [
     "separation_settings",
     "transcription_settings",
     "transforms",
+    "objectives",
 ]

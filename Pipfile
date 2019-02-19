@@ -21,10 +21,11 @@ torchvision = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
-vusic = {path = ".",editable = true}
+vusic = {editable = true, path = "."}
 botocore = "*"
 librosa = "*"
 magenta = "*"
+ffprobe = "*"
 
 [requires]
 python_version = "3.6"

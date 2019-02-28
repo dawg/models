@@ -3,20 +3,21 @@ import os
 import re
 import torch
 import logme
-import tqdm
 import zipfile
 import torchaudio
 import numpy as np
+import librosa
+
+from tqdm import tqdm
+from vusic.utils.downloader import Downloader
+from vusic.utils.transcription_settings import preprocess_settings, log_mel_info
+from magenta.music import midi_io, sequences_lib, audio_io
+from magenta.protobuf import music_pb2
+from google.protobuf.json_format import MessageToJson
 from magenta.models.onsets_frames_transcription.split_audio_and_label_data import (
     find_split_points,
 )
 
-from vusic.utils.downloader import Downloader
-from magenta.music import midi_io, sequences_lib, audio_io
-from vusic.utils.transcription_settings import preprocess_settings
-import librosa
-from magenta.protobuf import music_pb2
-from google.protobuf.json_format import MessageToJson
 
 test_dirs = ["MAPS/ENSTDkCl/MUS", "MAPS/ENSTDkCl/MUS"]
 train_dirs = [
@@ -102,7 +103,7 @@ def generate_training_set(dataset_path: str, dst: str = None):
         print(f"Creating training folder {dst}")
         os.mkdir(dst)
 
-    for d in train_dirs:
+    for d in tqdm(train_dirs):
         path = os.path.join(dataset_path, d)
         path = os.path.join(path, "*.wav")
         wav_files = glob.glob(path)
@@ -140,17 +141,25 @@ def generate_training_set(dataset_path: str, dst: str = None):
                                                  start, 
                                                  end - start)    
 
+                cropped_wav_data = padarray(cropped_wav_data, preprocess_settings["samples_per_chunk"])
+
+                mel = librosa.feature.melspectrogram(cropped_wav_data,
+                                                     hop_length=log_mel_info["hop_length"],
+                                                     fmin=log_mel_info["fmin"],
+                                                     sr=preprocess_settings["sampling_rate"],
+                                                     n_mels=log_mel_info["n_mels"],
+                                                     htk=log_mel_info["mel_htk"]).astype(np.float32)
+                mel = mel.T
+
                 training_sample = {
                     "wav_tensor": torch.from_numpy(cropped_wav_data),
+                    "mel_spec": torch.from_numpy(mel),
                     "ns": MessageToJson(cropped_ns),
                     "velocities": MessageToJson(velocity_tuple),
                 }
 
-                cropped_wav_data = padarray(cropped_wav_data, preprocess_settings["samples_per_chunk"])
                 torch.save(training_sample, os.path.join(dst, base_name + "_" + str(chunk_index) +  ".pt"))
-                chunk_index += 1                
-            return
-
+                chunk_index += 1   
 
 def main():
     downloader = Downloader.from_params(preprocess_settings["downloader"])

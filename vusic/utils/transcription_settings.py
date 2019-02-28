@@ -10,10 +10,16 @@ preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "transcription"),
     "downloader": {
         "bucket": "vuesic-musdbd18",
-        "dataset": "MAPS.zip",
+        "dataset": "MAPS",
         "downloading_dst": os.path.join(HOME, "storage", "transcription"),
     },
+    "sampling_rate": 16000,
+    "min_length": 5,
+    "max_length": 20.0,
+    "samples_per_chunk": 320000,
 }
+
+log_mel_info = {"n_mels": 226, "hop_length": 512, "mel_htk": False, "fmin": 30}
 
 hyper_params = {}
 

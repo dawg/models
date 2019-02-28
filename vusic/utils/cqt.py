@@ -45,4 +45,6 @@ class CQT(nn.Module):
             np.ndarray: Constant-Q value for each frequency at each time
         """
 
-        return lr.cqt(sample, sampling_rate=self.sampling_rate, hop_length=self.hop_length)
+        return lr.cqt(
+            sample, sampling_rate=self.sampling_rate, hop_length=self.hop_length
+        )

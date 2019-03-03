@@ -170,6 +170,7 @@ def generate_training_set(dataset_path: str, dst: str = None):
                 )
                 chunk_index += 1
 
+
 def generate_test_set(dataset_path: str, dst: str = None):
     """
     Desc:
@@ -253,6 +254,7 @@ def generate_test_set(dataset_path: str, dst: str = None):
                     os.path.join(dst, base_name + "_" + str(chunk_index) + ".pt"),
                 )
                 chunk_index += 1
+
 
 def main():
     downloader = Downloader.from_params(preprocess_settings["downloader"])

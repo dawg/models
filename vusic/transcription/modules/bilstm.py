@@ -32,7 +32,15 @@ class BiLstm(nn.Module):
         super(BiLstm, self).__init__()
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
-        self.nn.LSTM(input_size, hidden_size, num_layers, bias=False,batch_first=False,dropout=False, bidirectional = True)
+        self.nn.LSTM(
+            input_size,
+            hidden_size,
+            num_layers,
+            bias=False,
+            batch_first=False,
+            dropout=False,
+            bidirectional=True,
+        )
 
     def forward(self, x):
         out = None

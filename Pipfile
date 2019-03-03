@@ -27,8 +27,6 @@ librosa = "*"
 magenta = "*"
 ffprobe = "*"
 sounddevice = "*"
-protobuff = "*"
-protobuf = "*"
 protobuf-to-dict = "*"
 
 [requires]

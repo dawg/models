@@ -9,7 +9,6 @@ pytest = "*"
 
 [packages]
 soundfile = "*"
-numpy = "*"
 logme = "*"
 musdb = "*"
 "boto3" = "*"
@@ -17,14 +16,16 @@ requests = "*"
 tqdm = "*"
 scipy = "*"
 torch = "*"
-torchvision = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
-vusic = {path = ".",editable = true}
+vusic = {editable = true, path = "."}
 botocore = "*"
 librosa = "*"
 ffprobe = "*"
+sounddevice = "*"
+protobuf-to-dict = "*"
+black = "*"
 
 [requires]
 python_version = "3.6"

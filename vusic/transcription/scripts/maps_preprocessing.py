@@ -84,6 +84,61 @@ def padarray(A, size):
     t = size - A.shape[0]
     return np.pad(A, (0, t), mode="constant")
 
+def get_chunks_tensors(wav_file: str):
+    chunks_tensors    = []
+    base_name_root, _ = os.path.splitext(wav_file)
+    midi_file         = base_name_root + ".mid"
+
+    wav_data = read_wav_file(wav_file, preprocess_settings["sampling_rate"])
+    ns       = midi_io.midi_file_to_note_sequence(midi_file)
+
+    splits = find_split_points(
+        ns,
+        wav_data,
+        preprocess_settings["sampling_rate"],
+        preprocess_settings["min_length"],
+        preprocess_settings["max_length"],
+    )
+
+    velocities = [note.velocity for note in ns.notes]
+    velocity_max = np.max(velocities)
+    velocity_min = np.min(velocities)
+    velocity_tuple = music_pb2.VelocityRange(min=velocity_min, max=velocity_max)
+
+    for start, end in zip(splits[:-1], splits[1:]):
+        if end - start < preprocess_settings["min_length"]:
+            continue
+
+        cropped_ns = sequences_lib.extract_subsequence(ns, start, end)
+        cropped_wav_data = crop_wav_data(
+            wav_data, preprocess_settings["sampling_rate"], start, end - start
+        )
+
+        cropped_wav_data = padarray(
+            cropped_wav_data, preprocess_settings["samples_per_chunk"]
+        )
+
+        mel = librosa.feature.melspectrogram(
+            cropped_wav_data,
+            hop_length=log_mel_info["hop_length"],
+            fmin=log_mel_info["fmin"],
+            sr=preprocess_settings["sampling_rate"],
+            n_mels=log_mel_info["n_mels"],
+            htk=log_mel_info["mel_htk"],
+        ).astype(np.float32)
+        mel = mel.T
+
+        sample_tenor = {
+            "wav_tensor": torch.from_numpy(cropped_wav_data),
+            "mel_spec": torch.from_numpy(mel),
+            "ns": MessageToJson(cropped_ns),
+            "velocities": MessageToJson(velocity_tuple),
+        }
+
+        chunks_tensors.append(sample_tenor)
+    
+    print("Number of chunks in " + base_name_root + " is " + str(len(chunks_tensors)))
+    return chunks_tensors
 
 def generate_training_set(dataset_path: str, dst: str = None):
     """
@@ -113,59 +168,14 @@ def generate_training_set(dataset_path: str, dst: str = None):
 
         for wav_file in wav_files:
             base_name_root, _ = os.path.splitext(wav_file)
-            midi_file = base_name_root + ".mid"
-
-            wav_data = read_wav_file(wav_file, preprocess_settings["sampling_rate"])
-            ns = midi_io.midi_file_to_note_sequence(midi_file)
-
-            splits = find_split_points(
-                ns,
-                wav_data,
-                preprocess_settings["sampling_rate"],
-                preprocess_settings["min_length"],
-                preprocess_settings["max_length"],
-            )
-
-            velocities = [note.velocity for note in ns.notes]
-            velocity_max = np.max(velocities)
-            velocity_min = np.min(velocities)
-            velocity_tuple = music_pb2.VelocityRange(min=velocity_min, max=velocity_max)
-
             base_name = os.path.basename(base_name_root)
-            chunk_index = 0
 
-            for start, end in zip(splits[:-1], splits[1:]):
-                if end - start < preprocess_settings["min_length"]:
-                    continue
+            chunks_tensors = get_chunks_tensors(wav_file)
+            chunk_index    = 0
 
-                cropped_ns = sequences_lib.extract_subsequence(ns, start, end)
-                cropped_wav_data = crop_wav_data(
-                    wav_data, preprocess_settings["sampling_rate"], start, end - start
-                )
-
-                cropped_wav_data = padarray(
-                    cropped_wav_data, preprocess_settings["samples_per_chunk"]
-                )
-
-                mel = librosa.feature.melspectrogram(
-                    cropped_wav_data,
-                    hop_length=log_mel_info["hop_length"],
-                    fmin=log_mel_info["fmin"],
-                    sr=preprocess_settings["sampling_rate"],
-                    n_mels=log_mel_info["n_mels"],
-                    htk=log_mel_info["mel_htk"],
-                ).astype(np.float32)
-                mel = mel.T
-
-                training_sample = {
-                    "wav_tensor": torch.from_numpy(cropped_wav_data),
-                    "mel_spec": torch.from_numpy(mel),
-                    "ns": MessageToJson(cropped_ns),
-                    "velocities": MessageToJson(velocity_tuple),
-                }
-
+            for chunk_tensor in chunks_tensors:
                 torch.save(
-                    training_sample,
+                    chunk_tensor,
                     os.path.join(dst, base_name + "_" + str(chunk_index) + ".pt"),
                 )
                 chunk_index += 1
@@ -199,58 +209,13 @@ def generate_test_set(dataset_path: str, dst: str = None):
 
         for wav_file in wav_files:
             base_name_root, _ = os.path.splitext(wav_file)
-            midi_file = base_name_root + ".mid"
-
-            wav_data = read_wav_file(wav_file, preprocess_settings["sampling_rate"])
-            ns = midi_io.midi_file_to_note_sequence(midi_file)
-
-            splits = find_split_points(
-                ns,
-                wav_data,
-                preprocess_settings["sampling_rate"],
-                preprocess_settings["min_length"],
-                preprocess_settings["max_length"],
-            )
-
-            velocities = [note.velocity for note in ns.notes]
-            velocity_max = np.max(velocities)
-            velocity_min = np.min(velocities)
-            velocity_tuple = music_pb2.VelocityRange(min=velocity_min, max=velocity_max)
-
             base_name = os.path.basename(base_name_root)
-            chunk_index = 0
-            for start, end in zip(splits[:-1], splits[1:]):
-                if end - start < preprocess_settings["min_length"]:
-                    continue
 
-                cropped_ns = sequences_lib.extract_subsequence(ns, start, end)
-                cropped_wav_data = crop_wav_data(
-                    wav_data, preprocess_settings["sampling_rate"], start, end - start
-                )
-
-                cropped_wav_data = padarray(
-                    cropped_wav_data, preprocess_settings["samples_per_chunk"]
-                )
-
-                mel = librosa.feature.melspectrogram(
-                    cropped_wav_data,
-                    hop_length=log_mel_info["hop_length"],
-                    fmin=log_mel_info["fmin"],
-                    sr=preprocess_settings["sampling_rate"],
-                    n_mels=log_mel_info["n_mels"],
-                    htk=log_mel_info["mel_htk"],
-                ).astype(np.float32)
-                mel = mel.T
-
-                training_sample = {
-                    "wav_tensor": torch.from_numpy(cropped_wav_data),
-                    "mel_spec": torch.from_numpy(mel),
-                    "ns": MessageToJson(cropped_ns),
-                    "velocities": MessageToJson(velocity_tuple),
-                }
-
+            chunks_tensors = get_chunks_tensors(wav_file)
+            chunk_index    = 0
+            for chunk_tensor in chunks_tensors:
                 torch.save(
-                    training_sample,
+                    chunk_tensor,
                     os.path.join(dst, base_name + "_" + str(chunk_index) + ".pt"),
                 )
                 chunk_index += 1

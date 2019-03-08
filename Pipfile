@@ -9,7 +9,6 @@ pytest = "*"
 
 [packages]
 soundfile = "*"
-numpy = "*"
 logme = "*"
 musdb = "*"
 "boto3" = "*"

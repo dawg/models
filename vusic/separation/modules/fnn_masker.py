@@ -8,7 +8,7 @@ class FnnMasker(nn.Module):
     def __init__(self, input_size, output_size, context_length, debug):
         """
         Desc:
-            create a FNN for the Masker
+            create an FNN for the Masker
 
         Args:
             input_size (int): shape of the input

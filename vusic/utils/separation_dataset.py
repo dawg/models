@@ -57,6 +57,8 @@ class SeparationDataset(Dataset):
         mix = torch.load(mixpath)
         vocals = torch.load(vocalpath)
 
+        # if we're debugging on cpu, we need to convert to float 
+        # this is because half tensors are not supported on CPU
         if debug:
             mix["mg"] = mix["mg"].type(torch.float)
             mix["ph"] = mix["ph"].type(torch.float)

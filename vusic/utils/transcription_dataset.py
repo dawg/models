@@ -6,6 +6,7 @@ from vusic.utils.transcription_settings import debug
 from magenta.protobuf import music_pb2
 from google.protobuf.json_format import MessageToJson, Parse
 
+
 class TranscriptionDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None):
         """
@@ -22,9 +23,7 @@ class TranscriptionDataset(Dataset):
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
         self.filenames = [
-            name
-            for name in os.listdir(root_dir)
-            if name.endswith(suffix)
+            name for name in os.listdir(root_dir) if name.endswith(suffix)
         ]
 
     @classmethod
@@ -41,7 +40,7 @@ class TranscriptionDataset(Dataset):
         """
 
         transform = params["transform"] if "transform" in params else None
-            
+
         return cls(params["root_dir"], transform)
 
     def __len__(self):
@@ -54,7 +53,7 @@ class TranscriptionDataset(Dataset):
 
         mel = chunk_tensor["mel_spec"]
 
-        ns  = music_pb2.NoteSequence()
+        ns = music_pb2.NoteSequence()
         Parse(chunk_tensor["ns"], ns)
 
         velocities = music_pb2.VelocityRange()

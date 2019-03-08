@@ -16,17 +16,16 @@ requests = "*"
 tqdm = "*"
 scipy = "*"
 torch = "*"
-torchvision = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
-vusic = {editable = true,path = "."}
+vusic = {editable = true, path = "."}
 botocore = "*"
 librosa = "*"
-magenta = "*"
 ffprobe = "*"
 sounddevice = "*"
 protobuf-to-dict = "*"
+black = "*"
 
 [requires]
 python_version = "3.6"

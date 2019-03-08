@@ -84,13 +84,14 @@ def padarray(A, size):
     t = size - A.shape[0]
     return np.pad(A, (0, t), mode="constant")
 
+
 def get_chunks_tensors(wav_file: str):
-    chunks_tensors    = []
+    chunks_tensors = []
     base_name_root, _ = os.path.splitext(wav_file)
-    midi_file         = base_name_root + ".mid"
+    midi_file = base_name_root + ".mid"
 
     wav_data = read_wav_file(wav_file, preprocess_settings["sampling_rate"])
-    ns       = midi_io.midi_file_to_note_sequence(midi_file)
+    ns = midi_io.midi_file_to_note_sequence(midi_file)
 
     splits = find_split_points(
         ns,
@@ -136,9 +137,10 @@ def get_chunks_tensors(wav_file: str):
         }
 
         chunks_tensors.append(sample_tenor)
-    
+
     print("Number of chunks in " + base_name_root + " is " + str(len(chunks_tensors)))
     return chunks_tensors
+
 
 def generate_training_set(dataset_path: str, dst: str = None):
     """
@@ -171,7 +173,7 @@ def generate_training_set(dataset_path: str, dst: str = None):
             base_name = os.path.basename(base_name_root)
 
             chunks_tensors = get_chunks_tensors(wav_file)
-            chunk_index    = 0
+            chunk_index = 0
 
             for chunk_tensor in chunks_tensors:
                 torch.save(
@@ -212,7 +214,7 @@ def generate_test_set(dataset_path: str, dst: str = None):
             base_name = os.path.basename(base_name_root)
 
             chunks_tensors = get_chunks_tensors(wav_file)
-            chunk_index    = 0
+            chunk_index = 0
             for chunk_tensor in chunks_tensors:
                 torch.save(
                     chunk_tensor,

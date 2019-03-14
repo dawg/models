@@ -202,9 +202,6 @@ def main():
                 # step through optimizer
                 optimizer.step()
 
-                torch.save(rnn_encoder, output_paths["rnn_encoder"])
-                torch.save(rnn_decoder, output_paths["rnn_decoder"])
-                torch.save(fnn_masker, output_paths["fnn_masker"])
                 # record losses
                 epoch_loss.append(loss.item())
             torch.save(epoch_loss, output_paths["masker_loss"])

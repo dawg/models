@@ -65,8 +65,7 @@ class SeparationDataset(Dataset):
             vocals["mg"] = vocals["mg"].type(torch.float)
             vocals["ph"] = vocals["ph"].type(torch.float)
 
-        print(f"max: {mix['mg'].max()}, min: {mix['mg'].min()}, mean: {mix['mg'].mean()}")
-        print(f"max: {vocals['mg'].max()}, min: {vocals['mg'].min()}, mean: {vocals['mg'].mean()}")
+        print(f"file: {self.filenames[idx]}")
 
         sample = {"mix": mix, "vocals": vocals, "fname": self.filenames[idx]}
 

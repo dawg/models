@@ -25,6 +25,7 @@ vusic = {path = ".",editable = true}
 botocore = "*"
 librosa = "*"
 ffprobe = "*"
+paperspace = "*"
 
 [requires]
 python_version = "3.6"

@@ -58,21 +58,8 @@ def write_stem_pt(dst: str, fname: str, stem: object, is_stft: bool = False):
         mix = librosa.core.to_mono(mix)
         vocals = librosa.core.to_mono(vocals)
 
-        # print("\n\n\n"+fname)
-        # print(f"max: {mix.max()}, min: {mix.min()}, mean: {mix.mean()}")
-        # print(f"max: {vocals.max()}, min: {vocals.min()}, mean: {vocals.mean()}")
-
-        # scipy.io.wavfile.write(f'output/vocals{fname}.wav', 41000, vocals)
-        # scipy.io.wavfile.write(f'output/mix{fname}.wav', 41000, mix)
-
         mgmix, phmix = stft(mix)
         mgvocals, phvocals = stft(vocals)
-
-        # print("spec")
-        # print(f"shape: {mgmix.shape}, max: {mgmix.max()}, min: {mgmix.min()}, mean: {mgmix.mean()}")
-        # print(f"shape: {mgvocals.shape}, max: {mgvocals.max()}, min: {mgvocals.min()}, mean: {mgvocals.mean()}")
-
-        # return
 
         fmix = {
             "mg": torch.from_numpy(mgmix.astype(np.float16)),
@@ -161,11 +148,11 @@ def main():
 
     dst = preprocess_settings["pre_dst"]
 
-    # downloader.get_dataset(Set.TRAIN, dst)
-    # downloader.get_dataset(Set.TEST, dst)
+    downloader.get_dataset(Set.TRAIN, dst)
+    downloader.get_dataset(Set.TEST, dst)
 
     write(os.path.join(dst, "train"), os.path.join(dst, "pt_f_train"), is_stft=True)
-    # write(os.path.join(dst, "test"), os.path.join(dst, "pt_f_test"), is_stft=True)
+    write(os.path.join(dst, "test"), os.path.join(dst, "pt_f_test"), is_stft=True)
 
 
 if __name__ == "__main__":

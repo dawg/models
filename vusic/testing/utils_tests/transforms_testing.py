@@ -22,16 +22,16 @@ if __name__ == "__main__":
     print(f"Training set contains {len(train_ds)} samples.")
     # print(f"Testing set contains {len(test_ds)} samples.")
 
-    sample = train_ds[0]
+    # sample = train_ds[0]
 
-    f_sample = sample["mix"]
+    # f_sample = sample["mix"]
 
-    D = librosa.amplitude_to_db(f_sample["mg"], ref=np.max)
-    plt.figure(1)
-    librosa.display.specshow(D, y_axis="log")
-    plt.colorbar(format="%+2.0f dB")
-    plt.title("Logarithmic Frequency Power Spectrogram of Mixture")
-    plt.show()
+    # D = librosa.amplitude_to_db(f_sample["mg"], ref=np.max)
+    # plt.figure(1)
+    # librosa.display.specshow(D, y_axis="log")
+    # plt.colorbar(format="%+2.0f dB")
+    # plt.title("Logarithmic Frequency Power Spectrogram of Mixture")
+    # plt.show()
 
     # D = librosa.amplitude_to_db(sample["vocals"]["mg"], ref=np.max)
     # plt.figure(2)
@@ -40,9 +40,9 @@ if __name__ == "__main__":
     # plt.title("Logarithmic Frequency Power Spectrogram of ")
     # plt.show()
 
-    # x = torch.load("output/masker_loss.pth")    
+    x = torch.load("output/masker_loss.pth")    
 
-    # print(f"size {len(x)}")
-    # plt.figure(1)
-    # plt.plot(x)
-    # plt.show()
+    print(f"size {len(x)}")
+    plt.figure(1)
+    plt.plot(x)
+    plt.show()

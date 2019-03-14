@@ -109,3 +109,5 @@ venv.bak/
 
 # Vscode settings
 .vscode/settings.json
+
+output/

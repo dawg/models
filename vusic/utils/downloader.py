@@ -79,12 +79,8 @@ class Downloader:
 
             bucket = boto3.resource("s3").Bucket(self.bucket)
 
-            pbar = self.CallbackProgressBar(
-                bucket.Object(self.dataset).get()["ContentLength"], unit="bytes"
-            )
-
             try:
-                bucket.download_file(self.dataset, path, Callback=pbar)
+                bucket.download_file(self.dataset, path)
             except Exception:
                 logger.info(f"Failed to download {self.dataset}")
                 raise
@@ -112,7 +108,6 @@ class Downloader:
         path = self.download_dataset(dst)
 
         with zipfile.ZipFile(path, "r") as z:
-
             logger.info(f"Extracting files from {path}")
             for fname in tqdm.tqdm(z.namelist(), unit="Ex"):
                 if fname.startswith(directory) and not os.path.exists(
@@ -120,5 +115,4 @@ class Downloader:
                 ):
                     logger.info(f"file in {path}")
                     z.extractall(path=dst, members=[fname])
-
         return

@@ -28,9 +28,10 @@ hyper_params = {
     "max_grad_norm": 0.5,
     "l_reg_m": 1e-2,
     "l_reg_twin": 0.5,
+    "l_reg_denoiser": 1e-4,
 }
 
-# amount of bins we want to preserve
+# amount of bins we want to preserve for generating the mask
 preserved_bins = 744
 
 # context length for RNNs
@@ -47,7 +48,7 @@ output_paths = {
 }
 
 training_settings = {
-    "epochs": 2 if debug else 100,
+    "epochs": 1 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,
@@ -64,6 +65,7 @@ training_settings = {
         "output_size": stft_info["win_length"],
         "context_length": context_length,
     },
+    "fnn_denoiser_params": {"input_size": stft_info["win_length"], "debug": debug},
     "affine_transform_params": {"debug": debug, "input_size": preserved_bins * 2},
     "batch_size": 16,
 }

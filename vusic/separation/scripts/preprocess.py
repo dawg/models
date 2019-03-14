@@ -10,6 +10,8 @@ import torch
 import numpy as np
 import librosa
 
+import scipy.io.wavfile
+
 from vusic.utils import STFT
 from vusic.utils.separation_settings import preprocess_settings, stft_info
 from vusic.utils import Downloader
@@ -47,27 +49,26 @@ def write_stem_pt(dst: str, fname: str, stem: object, is_stft: bool = False):
     fname += ".pth"
 
     if is_stft:
-        mix = np.transpose(stem[Stem.MIX, :, :].astype(np.float32))
-        vocals = np.transpose(stem[Stem.VOCALS, :, :].astype(np.float32))
+        mix = np.transpose(stem[Stem.MIX, :, :])
+        vocals = np.transpose(stem[Stem.VOCALS, :, :])
 
         mix = mix[:, :, 0]
-
         vocals = vocals[:, :, 0]
 
         mix = librosa.core.to_mono(mix)
         vocals = librosa.core.to_mono(vocals)
 
-        fmix = stft.forward(mix)
-        fvocals = stft.forward(vocals)
+        mgmix, phmix = stft(mix)
+        mgvocals, phvocals = stft(vocals)
 
         fmix = {
-            "mg": torch.from_numpy(np.abs(fmix).transpose().astype(np.float16)),
-            "ph": torch.from_numpy(np.angle(fmix).transpose().astype(np.float16)),
+            "mg": torch.from_numpy(mgmix.astype(np.float16)),
+            "ph": torch.from_numpy(phmix.astype(np.float16)),
         }
 
         fvocals = {
-            "mg": torch.from_numpy(np.abs(fvocals).transpose().astype(np.float16)),
-            "ph": torch.from_numpy(np.angle(fvocals).transpose().astype(np.float16)),
+            "mg": torch.from_numpy(mgvocals.astype(np.float16)),
+            "ph": torch.from_numpy(phvocals.astype(np.float16)),
         }
 
         torch.save(fmix, os.path.join(dst, "mix", fname))

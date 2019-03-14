@@ -26,6 +26,7 @@ ffprobe = "*"
 sounddevice = "*"
 protobuf-to-dict = "*"
 black = "*"
+mir-eval = "*"
 
 [requires]
 python_version = "3.6"

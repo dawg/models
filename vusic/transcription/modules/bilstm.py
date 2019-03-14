@@ -2,17 +2,17 @@ import torch
 import torch.nn as nn
 
 
-__all__ = ["OnsetBiLstm"]
+__all__ = ["BiLstm"]
 
 
-class OnsetBiLstm(nn.Module):
+class BiLstm(nn.Module):
     def __init__(self, debug):
         """
         Desc:
             Create implementation of the onset BiLSTM, this feeds into a fully connected layer with 88 neurons 
 
         Args:
-            debug (bool): debug mode
+            debug - debug mode
 
             input_size – The number of expected features in the input x
 
@@ -51,10 +51,10 @@ class OnsetBiLstm(nn.Module):
             c_n (num_layers * num_directions, batch, hidden_size): tensor containing the cell state for t = seq_len
         """
 
-        super(OnsetBiLstm, self).__init__()
+        super(BiLstm, self).__init__()
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
-        self.onset_lstm = nn.LSTM(
+        self.lstm = nn.LSTM(
             512,
             1024,  # Determine hidden layer size
             1,
@@ -67,6 +67,6 @@ class OnsetBiLstm(nn.Module):
         self.fnn = nn.Linear(1024, 88)
 
     def forward(self, x):
-        out = self.onset_lstm(x)
+        out = self.lstm(x)
         out = self.fnn(out)
         return out

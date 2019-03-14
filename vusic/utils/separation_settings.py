@@ -65,11 +65,7 @@ training_settings = {
         "output_size": stft_info["win_length"],
         "context_length": context_length,
     },
-    "fnn_denoiser_params": {
-        "input_size": stft_info["win_length"],
-        "debug": debug,
-
-    },
+    "fnn_denoiser_params": {"input_size": stft_info["win_length"], "debug": debug},
     "affine_transform_params": {"debug": debug, "input_size": preserved_bins * 2},
     "batch_size": 16,
 }

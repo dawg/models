@@ -64,14 +64,18 @@ class STFT(nn.Module):
         p_end = x.size - window_size
         indx = 0
 
-        if np.sum(windowing_func) != 0.:
+        if np.sum(windowing_func) != 0.0:
             windowing_func = windowing_func / np.sqrt(self.n_fft)
 
-        xm_x = np.zeros((int(len(x) / self.hop_length), int(self.n_fft / 2) + 1), dtype=np.float32)
-        xp_x = np.zeros((int(len(x) / self.hop_length), int(self.n_fft / 2) + 1), dtype=np.float32)
+        xm_x = np.zeros(
+            (int(len(x) / self.hop_length), int(self.n_fft / 2) + 1), dtype=np.float32
+        )
+        xp_x = np.zeros(
+            (int(len(x) / self.hop_length), int(self.n_fft / 2) + 1), dtype=np.float32
+        )
 
         while p_in <= p_end:
-            x_seg = x[p_in:p_in + window_size]
+            x_seg = x[p_in : p_in + window_size]
 
             mc_x, pc_x = _dft(x_seg, windowing_func, self.n_fft)
 
@@ -82,6 +86,7 @@ class STFT(nn.Module):
             indx += 1
 
         return xm_x, xp_x
+
 
 def _dft(x, windowing_func, fft_size):
     """
@@ -100,7 +105,7 @@ def _dft(x, windowing_func, fft_size):
 
     x = fftpack.fft(fft_buffer)
 
-    magn_x = (np.abs(x[:half_n]))
-    phase_x = (np.angle(x[:half_n]))
+    magn_x = np.abs(x[:half_n])
+    phase_x = np.angle(x[:half_n])
 
     return magn_x, phase_x

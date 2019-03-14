@@ -48,7 +48,7 @@ class ISTFT(nn.Module):
 
                 np.angle(M[f, t]) is the phase of frequency bin f at frame t
         """
-        
+
         rs = _gl_alg(window_size, hop, (window_size - 1) * 2)
 
         hw_1 = int(np.floor((window_size + 1) / 2))
@@ -69,7 +69,7 @@ class ISTFT(nn.Module):
             y_buf = _i_dft(magnitude_spect[index, :], phase[index, :], window_size)
 
             # Overlap and Add
-            time_domain_signal[pin:pin + window_size] += y_buf * rs
+            time_domain_signal[pin : pin + window_size] += y_buf * rs
 
             # Advance pointer
             pin += hop
@@ -78,11 +78,9 @@ class ISTFT(nn.Module):
         time_domain_signal = np.delete(time_domain_signal, range(3 * hop))
         time_domain_signal = np.delete(
             time_domain_signal,
-            range(time_domain_signal.size - (3 * hop + 1),
-                time_domain_signal.size)
+            range(time_domain_signal.size - (3 * hop + 1), time_domain_signal.size),
         )
 
         return time_domain_signal
-        
 
         return lr.istft(stft, hop_length=self.hop_length, win_length=self.win_length)

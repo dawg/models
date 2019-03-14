@@ -29,6 +29,7 @@ from vusic.separation.modules import (
     FnnDenoiser,
 )
 
+
 def main():
     # set seed for consistency
     torch.manual_seed(5)
@@ -43,7 +44,9 @@ def main():
 
     # init dataset
     print(f"-- Loading training data...", end="")
-    train_ds = SeparationDataset(training_settings["training_path"], transform=overlap_transform)
+    train_ds = SeparationDataset(
+        training_settings["training_path"], transform=overlap_transform
+    )
     dataloader = DataLoader(train_ds, shuffle=True)
     print(f"done! Training set contains {len(train_ds)} samples.", end="\n\n")
 
@@ -129,14 +132,12 @@ def main():
 
             print(f"batches in song: {int(mix_mg.shape[1]/batch_size)}")
 
-            for batch in range(int(mix_mg.shape[1]/batch_size)):
+            for batch in range(int(mix_mg.shape[1] / batch_size)):
 
                 batch_start = batch * batch_size
                 batch_end = (batch + 1) * batch_size
 
-                mix_mg_sequence = mix_mg[
-                    0, batch_start:batch_end, :, :
-                ]
+                mix_mg_sequence = mix_mg[0, batch_start:batch_end, :, :]
                 vocal_mg_sequence = vocal_mg[
                     0, batch_start:batch_end, context_length:-context_length, :
                 ]
@@ -171,14 +172,18 @@ def main():
                 reg_twin = hyper_params["l_reg_twin"] * twin_reg(
                     affine, m_t_dec.detach()
                 )
-                reg_denoiser = hyper_params["l_reg_denoiser"] * denoiser_reg(fnn_denoiser.fnn_dec.weight)
+                reg_denoiser = hyper_params["l_reg_denoiser"] * denoiser_reg(
+                    fnn_denoiser.fnn_dec.weight
+                )
 
-                loss = loss_m + loss_twin + loss_denoiser + reg_m + reg_twin + reg_denoiser
+                loss = (
+                    loss_m + loss_twin + loss_denoiser + reg_m + reg_twin + reg_denoiser
+                )
 
                 print(
                     f"loss: {loss:6.9f}, masker: {loss_m:6.9f}, denoiser: {loss_denoiser:6.9f}, twin: {loss_twin:6.9f}"
                 )
-                            
+
                 loss.backward()
 
                 # gradient norm clipping
@@ -205,7 +210,6 @@ def main():
             torch.save(epoch_loss, output_paths["masker_loss"])
 
         epoch_end = time.time()
-
 
     # we are done training! save and record our model state
     print(f"-- Exporting model...", end="")

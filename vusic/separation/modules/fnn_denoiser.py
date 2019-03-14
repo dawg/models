@@ -47,10 +47,7 @@ class FnnDenoiser(nn.Module):
             param (object): parameters for creating the FNN. See constructor for ingredients
         """
         # todo add defaults
-        return cls(
-            params["input_size"],
-            params["debug"],
-        )
+        return cls(params["input_size"], params["debug"])
 
     def forward(self, m_masked):
         """

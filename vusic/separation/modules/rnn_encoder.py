@@ -140,17 +140,17 @@ class RnnEncoder(nn.Module):
             batch_size, seq_length - (2 * self.context_length), 2 * self.input_size
         ).to(self.device)
 
-        v_tr = v_in[:, :, :self.input_size]
+        v_tr = v_in[:, :, : self.input_size]
 
         for t in range(seq_length):
             h_t_f = self.gru_enc_f((v_tr[:, t, :]), h_t_f)
             h_t_b = self.gru_enc_b((v_tr[:, seq_length - t - 1, :]), h_t_b)
 
             if self.context_length <= t < seq_length - self.context_length:
-                h_t = torch.cat([
-                    h_t_f + v_tr[:, t, :],
-                    h_t_b + v_tr[:, seq_length - t - 1, :]
-                ], dim=1)
+                h_t = torch.cat(
+                    [h_t_f + v_tr[:, t, :], h_t_b + v_tr[:, seq_length - t - 1, :]],
+                    dim=1,
+                )
                 h_enc[:, t - self.context_length, :] = h_t
 
         return h_enc

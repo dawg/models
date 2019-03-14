@@ -118,7 +118,6 @@ class Downloader:
                 if fname.startswith(directory) and not os.path.exists(
                     os.path.join(dst, fname)
                 ):
-                    print("***" + fname + "***")
                     logger.info(f"file in {path}")
                     z.extractall(path=dst, members=[fname])
 

@@ -86,7 +86,7 @@ class RnnEncoder(nn.Module):
         # todo add defaults
         return cls(params["input_size"], params["context_length"], params["debug"])
 
-    def forward(self, windows):
+    def forward(self, v_in):
         """
         Desc:
             Forward pass through RNN encoder.
@@ -99,35 +99,58 @@ class RnnEncoder(nn.Module):
             
         """
 
-        batch_size = windows.size()[0]
-        sequence_length = windows.size()[1]
+        # batch_size = windows.size()[0]
+        # sequence_length = windows.size()[1]
 
-        forward_t = torch.zeros(batch_size, self.input_size).to(self.device)
-        backward_t = torch.zeros(batch_size, self.input_size).to(self.device)
+        # forward_t = torch.zeros(batch_size, self.input_size).to(self.device)
+        # backward_t = torch.zeros(batch_size, self.input_size).to(self.device)
 
-        m_enc = torch.zeros(
-            batch_size, sequence_length - (2 * self.context_length), 2 * self.input_size
+        # m_enc = torch.zeros(
+        #     batch_size, sequence_length - (2 * self.context_length), 2 * self.input_size
+        # ).to(self.device)
+
+        # # remove some windows
+        # windows_reduced = windows[:, :, : self.input_size]
+
+        # for t in range(sequence_length):
+
+        #     forward_t = self.gru_enc_f((windows_reduced[:, t, :]), forward_t)
+        #     backward_t = self.gru_enc_b(
+        #         (windows_reduced[:, sequence_length - t - 1, :]), backward_t
+        #     )
+
+        #     if self.context_length <= t < sequence_length - self.context_length:
+        #         m_h_enc = torch.cat(
+        #             [
+        #                 forward_t + windows_reduced[:, t, :],
+        #                 backward_t + windows_reduced[:, sequence_length - t - 1, :],
+        #             ],
+        #             dim=1,
+        #         )
+
+        #         m_enc[:, t - self.context_length, :] = m_h_enc
+
+        batch_size = v_in.size()[0]
+        seq_length = v_in.size()[1]
+
+        h_t_f = torch.zeros(batch_size, self.input_size).to(self.device)
+        h_t_b = torch.zeros(batch_size, self.input_size).to(self.device)
+
+        h_enc = torch.zeros(
+            batch_size, seq_length - (2 * self.context_length), 2 * self.input_size
         ).to(self.device)
 
-        # remove some windows
-        windows_reduced = windows[:, :, : self.input_size]
+        v_tr = v_in[:, :, :self.input_size]
 
-        for t in range(sequence_length):
+        for t in range(seq_length):
+            h_t_f = self.gru_enc_f((v_tr[:, t, :]), h_t_f)
+            h_t_b = self.gru_enc_b((v_tr[:, seq_length - t - 1, :]), h_t_b)
 
-            forward_t = self.gru_enc_f((windows_reduced[:, t, :]), forward_t)
-            backward_t = self.gru_enc_b(
-                (windows_reduced[:, sequence_length - t - 1, :]), backward_t
-            )
+            if self.context_length <= t < seq_length - self.context_length:
+                h_t = torch.cat([
+                    h_t_f + v_tr[:, t, :],
+                    h_t_b + v_tr[:, seq_length - t - 1, :]
+                ], dim=1)
+                h_enc[:, t - self.context_length, :] = h_t
 
-            if self.context_length <= t < sequence_length - self.context_length:
-                m_h_enc = torch.cat(
-                    [
-                        forward_t + windows_reduced[:, t, :],
-                        backward_t + windows_reduced[:, sequence_length - t - 1, :],
-                    ],
-                    dim=1,
-                )
-
-                m_enc[:, t - self.context_length, :] = m_h_enc
-
-        return m_enc
+        return h_enc

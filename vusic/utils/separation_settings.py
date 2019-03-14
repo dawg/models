@@ -10,7 +10,8 @@ __all__ = [
 
 debug = True
 
-HOME = os.path.expanduser("~")
+# XXX
+HOME = os.path.expanduser("~") if debug else "/"
 
 preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "separation"),
@@ -36,7 +37,7 @@ preserved_bins = 744
 
 # context length for RNNs
 context_length = 10
-output_folder = "output"
+output_folder = "output" if debug else os.path.join(HOME, "artifacts", "separation")
 
 output_paths = {
     "output_folder": output_folder,

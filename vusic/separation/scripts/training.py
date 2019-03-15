@@ -180,9 +180,9 @@ def main():
                     loss_m + loss_twin + loss_denoiser + reg_m + reg_twin + reg_denoiser
                 )
 
-                print(
-                    f"loss: {loss:6.9f}, masker: {loss_m:6.9f}, denoiser: {loss_denoiser:6.9f}, twin: {loss_twin:6.9f}"
-                )
+                # print(
+                #     f"loss: {loss:6.9f}, masker: {loss_m:6.9f}, denoiser: {loss_denoiser:6.9f}, twin: {loss_twin:6.9f}"
+                # )
 
                 loss.backward()
 
@@ -202,8 +202,9 @@ def main():
                 # step through optimizer
                 optimizer.step()
 
-                # record losses
                 epoch_loss.append(loss.item())
+
+            # record losses at the end of every song
             torch.save(epoch_loss, output_paths["masker_loss"])
 
         epoch_end = time.time()

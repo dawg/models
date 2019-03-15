@@ -1,76 +1,72 @@
 import os
-import sys
-import time
-import torch
-import torch.nn as nn
-import torch.optim as optim
+import numpy as np
 
+from torch.nn.utils import clip_grad_norm_
+from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
+from tqdm import tqdm
+from tensorboardX import SummaryWriter
+from vusic.transcription.training.evaluate import evaluate
+from vusic.utils.transcription_settings import constants, training_settings
 from vusic.utils.transcription_dataset import TranscriptionDataset
-from vusic.transcription.modules.model import Model
-from vusic.utils.transcription_settings import (
-    debug,
-    hyper_params,
-    training_settings,
-    output_paths,
-)
+from vusic.transcription.modules.onset_frame_model import OnsetFrameModel
+from vusic.utils.transcription_utils import summary, cycle
+from vusic.transcription.modules.mel import melspectrogram
 
-def main():
-    # set seed for consistency
-    torch.manual_seed(5)
+def train():
+    model_dir = training_settings['model_dir']
+    device = constants['device']
+    iterations = training_settings['iterations']
+    resume_iteration = training_settings['resume_iteration']
+    checkpoint_interval = training_settings['checkpoint_interval']
+    batch_size = training_settings['batch_size']
+    sequence_length = training_settings['sequence_length']
+    model_complexity = training_settings['model_complexity']
+    learning_rate = training_settings['learning_rate']
+    learning_rate_decay_steps = training_settings['learning_rate_decay_steps']
+    learning_rate_decay_rate = training_settings['learning_rate_decay_rate']
+    clip_gradient_norm = training_settings['clip_gradient_norm']
+    validation_length = training_settings['validation_length']
+    validation_interval = training_settings['validation_interval']
     
-    device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
-    batch_size = training_settings["batch_size"]
+    os.makedirs(model_dir, exist_ok=True)
+    writer = SummaryWriter(model_dir)
 
-    print(f"\n-- Starting training. Debug mode: {debug}")
-    print(f"-- Using: {device}", end="\n\n")
+    dataset = TranscriptionDataset(sequence_length=sequence_length)
+    loader = DataLoader(dataset, batch_size, shuffle=True)
 
-    # init dataset
-    print(f"-- Loading training data...", end="")
-    train_ds = TranscriptionDataset(training_settings["training_path"])
-    dataloader = DataLoader(train_ds, shuffle=True)
-    print(f"done! Training set contains {len(train_ds)} samples.", end="\n\n")
+    if resume_iteration is None:
+        model = OnsetFrameModel(constants['n_mels'], constants['max_midi'] - constants['min_midi'] + 1, constants['model_complexity']).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), learning_rate)
+        resume_iteration = 0
+    else:
+        model_path = os.path.join(model_dir, f'model-{resume_iteration}.pt')
+        model = torch.load(model_path)
+        optimizer = torch.optim.Adam(model.parameters(), learning_rate)
+        optimizer.load_state_dict(torch.load(os.path.join(model_dir, 'last-optimizer-state.pt')))
 
-    print(f"-- Initializing The model...", end="")
-    model = Model(True).to(device)
-    print(model)
-    print(f"done!", end="\n\n")
-    
-    # optimizer
-    print(f"-- Creating optimizer...", end="")
-    optimizer = optim.Adam(
-        model.parameters(),
-        lr=hyper_params["learning_rate"],
-    )
-    print(f"done!", end="\n\n")
+    summary(model)
+    scheduler = StepLR(optimizer, step_size=learning_rate_decay_steps, gamma=learning_rate_decay_rate)
 
-    for epoch in range(training_settings["epochs"]):
+    loop = tqdm(range(resume_iteration + 1, iterations + 1))
+    for i, batch in zip(loop, cycle(loader)):
+        scheduler.step()
 
-        epoch_loss = []
+        mel = melspectrogram(batch['audio'].reshape(-1, batch['audio'].shape[-1])[:, :-1]).transpose(-1, -2)
+        predictions, losses = model.run_on_batch(batch, mel)
 
-        epoch_start = time.time()
+        loss = sum(losses.values())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-        for i, sample in enumerate(dataloader):
+        if clip_gradient_norm:
+            for parameter in model.parameters():
+                clip_grad_norm_([parameter], clip_gradient_norm)
 
-            print(f"Sample {i}: {sample['mix']['mg'].size()}")
+        for key, value in {'loss': loss, **losses}.items():
+            writer.add_scalar(key, value.item(), global_step=i)
 
-            mel = sample["mel"].to(device)
-            ns = sample["ns"].to(device)
-            velocities = sample["velocities"]
-
-            # Init Optimizers
-            optimizer.zero_grad()
-            mel = mel.requires_grad_() #set requires_grad to True for training
-
-            onset_output = model(mel)
-            frame_output = model(mel, onset_output)
-
-        epoch_end = time.time()
-
-        print(
-            f"epoch: {epoch}, loss: {loss}, epoch time: {epoch_end - epoch_start}"
-        )
-
-
-if __name__ == 'main':
-   main()
+        if i % checkpoint_interval == 0:
+            torch.save(model, os.path.join(model_dir, f'model-{i}.pt'))
+            torch.save(optimizer.state_dict(), os.path.join(model_dir, 'last-optimizer-state.pt'))

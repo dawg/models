@@ -27,6 +27,7 @@ sounddevice = "*"
 protobuf-to-dict = "*"
 black = "*"
 mir-eval = "*"
+tensorboardx = "*"
 
 [requires]
 python_version = "3.6"

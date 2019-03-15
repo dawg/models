@@ -4,6 +4,6 @@
 # paperspace login
 # echo Done!
 
-echo Creating track separation job...
-paperspace jobs create --container dawgpeople/models --command "python vusic/separation/scripts/train.py"
-echo Done!
+echo "Creating track separation job..."
+paperspace jobs create --container "dawgpeople/models:latest" --command "python vusic/separation/scripts/train.py"
+echo "Done!"

@@ -18,17 +18,14 @@ case ${OS} in
   *) ;;
 esac
 
-echo Installing apt-get dependencies
+echo "Installing apt-get dependencies"
 sudo apt-get install -y build-essential libasound2-dev libjack-dev >/dev/null
 
 
 if ! command_exists pipenv; then
-  echo Installing pipenv
+  echo "Installing pipenv"
   pip install --quiet pipenv
 fi
 
-echo Installing python modules
+echo "Installing python modules"
 pipenv install --pre --dev --deploy --skip-lock
-
-echo Using virtual environment
-pipenv shell

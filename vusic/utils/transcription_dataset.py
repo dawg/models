@@ -45,7 +45,8 @@ class TranscriptionDataset(Dataset):
         if self.sequence_length is not None:
             audio_length = len(data["audio"])
             step_begin = (
-                self.random.randint(audio_length - self.sequence_length) // constants["hop_length"]
+                self.random.randint(audio_length - self.sequence_length)
+                // constants["hop_length"]
             )
             n_steps = self.sequence_length // constants["hop_length"]
             step_end = step_begin + n_steps

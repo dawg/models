@@ -44,6 +44,7 @@ output_paths = {
     "rnn_encoder": os.path.join(output_folder, "rnn_encoder.pth"),
     "rnn_decoder": os.path.join(output_folder, "rnn_decoder.pth"),
     "fnn_masker": os.path.join(output_folder, "fnn_masker.pth"),
+    "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
     "masker_loss": os.path.join(output_folder, "masker_loss.pth"),
     "twin_loss": os.path.join(output_folder, "twin_loss.pth"),
 }

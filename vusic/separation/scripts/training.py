@@ -213,6 +213,7 @@ def main():
     torch.save(rnn_encoder, output_paths["rnn_encoder"])
     torch.save(rnn_decoder, output_paths["rnn_decoder"])
     torch.save(fnn_masker, output_paths["fnn_masker"])
+    torch.save(fnn_denoiser, output_paths["fnn_denoiser"])
     print(f"done!")
 
 

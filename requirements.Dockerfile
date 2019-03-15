@@ -15,9 +15,10 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 WORKDIR ${DIR}
+COPY . ${DIR} 
+CMD ["bats", "requirements_test.bats"]
+
 COPY environment.sh .
 RUN ["chmod", "+x", "environment.sh"]
 RUN ./environment.sh
 
-COPY ${DIR} .
-CMD ["bats", "requirements_test.bats"]

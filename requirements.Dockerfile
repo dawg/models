@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ENV DIR .
+ENV DIR "vusic"
 
 RUN apt-get update && \
   apt-get install -y software-properties-common && \
@@ -15,7 +15,8 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 WORKDIR ${DIR}
-COPY . ${DIR} 
+
+COPY . ${DIR}
 CMD ["bats", "requirements_test.bats"]
 
 COPY environment.sh .

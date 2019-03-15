@@ -17,8 +17,6 @@ ENV LANG C.UTF-8
 WORKDIR ${DIR}
 COPY . ${DIR}
 
-RUN ls ${DIR}
-
 COPY environment.sh .
 RUN ["chmod", "+x", "environment.sh"]
 RUN ./environment.sh

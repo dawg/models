@@ -27,5 +27,4 @@ if ! command_exists pipenv; then
 fi
 
 echo "Installing python modules from Pipfile"
-tree .
 pipenv install --pre --dev --deploy --skip-lock

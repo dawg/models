@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ENV DIR "."
+ENV DIR .
 
 RUN apt-get update && \
   apt-get install -y software-properties-common && \
@@ -19,5 +19,5 @@ COPY environment.sh .
 RUN ["chmod", "+x", "environment.sh"]
 RUN ./environment.sh
 
-COPY . ${DIR}
+COPY ${DIR} .
 CMD ["bats", "requirements_test.bats"]

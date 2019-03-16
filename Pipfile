@@ -28,6 +28,7 @@ protobuf-to-dict = "*"
 black = "*"
 mir-eval = "*"
 tensorboardx = "*"
+ffmpy = "*"
 
 [requires]
 python_version = "3.6"

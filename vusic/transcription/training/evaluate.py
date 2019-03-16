@@ -15,8 +15,13 @@ from scipy.stats import hmean
 from tqdm import tqdm
 from vusic.transcription.modules.mel import melspectrogram
 from vusic.utils.transcription_settings import constants
-from vusic.utils.transcription_utils import extract_notes, notes_to_frames
-
+from vusic.utils.midi_utils import save_midi
+from vusic.utils.transcription_utils import (
+    extract_notes,
+    notes_to_frames,
+    summary,
+    save_pianoroll,
+)
 eps = sys.float_info.epsilon
 
 
@@ -52,18 +57,18 @@ def evaluate(data, model, onset_threshold=0.5, frame_threshold=0.5, save_path=No
         scaling = constants["hop_length"] / constants["sampling_rate"]
 
         i_ref = (i_ref * scaling).reshape(-1, 2)
-        p_ref = np.array([midi_to_hz(constant["min_midi"] + midi) for midi in p_ref])
+        p_ref = np.array([midi_to_hz(constants["min_midi"] + midi) for midi in p_ref])
         i_est = (i_est * scaling).reshape(-1, 2)
-        p_est = np.array([midi_to_hz(constant["min_midi"] + midi) for midi in p_est])
+        p_est = np.array([midi_to_hz(constants["min_midi"] + midi) for midi in p_est])
 
         t_ref = t_ref.astype(np.float64) * scaling
         f_ref = [
-            np.array([midi_to_hz(constant["min_midi"] + midi) for midi in freqs])
+            np.array([midi_to_hz(constants["min_midi"] + midi) for midi in freqs])
             for freqs in f_ref
         ]
         t_est = t_est.astype(np.float64) * scaling
         f_est = [
-            np.array([midi_to_hz(constant["min_midi"] + midi) for midi in freqs])
+            np.array([midi_to_hz(constants["min_midi"] + midi) for midi in freqs])
             for freqs in f_est
         ]
 

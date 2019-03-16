@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
 from vusic.transcription.modules.kelz_cnn import KelzCnn
 from vusic.transcription.modules.bilstm import BiLstm
 

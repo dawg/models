@@ -64,12 +64,10 @@ def train():
             batch["audio"].reshape(-1, batch["audio"].shape[-1])[:, :-1]
         ).transpose(-1, -2)
 
-        print("*** MEL SHAPE IS " + str(mel.shape) + "*****")
-
         predictions, losses = model.run_on_batch(batch, mel)
 
         loss = sum(losses.values())
-                
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()

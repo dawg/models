@@ -6,6 +6,8 @@ from functools import reduce
 from PIL import Image
 from torch.nn.modules.module import _addindent
 
+"""Utilities obtained from Jong Wook Kim's https://github.com/jongwook/onsets-and-frames"""
+
 
 def cycle(iterable):
     while True:

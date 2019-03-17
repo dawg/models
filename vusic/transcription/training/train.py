@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import torch 
 
 from torch.nn.utils import clip_grad_norm_
 from torch.optim.lr_scheduler import StepLR
@@ -16,7 +17,7 @@ from vusic.transcription.modules.mel import melspectrogram
 
 def train():
     model_dir = training_settings["model_dir"]
-    device = constants["device"]
+    device = constants["default_device"]
     iterations = training_settings["iterations"]
     resume_iteration = training_settings["resume_iteration"]
     checkpoint_interval = training_settings["checkpoint_interval"]
@@ -27,8 +28,6 @@ def train():
     learning_rate_decay_steps = training_settings["learning_rate_decay_steps"]
     learning_rate_decay_rate = training_settings["learning_rate_decay_rate"]
     clip_gradient_norm = training_settings["clip_gradient_norm"]
-    validation_length = training_settings["validation_length"]
-    validation_interval = training_settings["validation_interval"]
 
     os.makedirs(model_dir, exist_ok=True)
     writer = SummaryWriter(model_dir)
@@ -40,7 +39,7 @@ def train():
         model = OnsetFrameModel(
             constants["n_mels"],
             constants["max_midi"] - constants["min_midi"] + 1,
-            constants["model_complexity"],
+            model_complexity,
         ).to(device)
         optimizer = torch.optim.Adam(model.parameters(), learning_rate)
         resume_iteration = 0
@@ -64,9 +63,13 @@ def train():
         mel = melspectrogram(
             batch["audio"].reshape(-1, batch["audio"].shape[-1])[:, :-1]
         ).transpose(-1, -2)
+
+        print("*** MEL SHAPE IS " + str(mel.shape) + "*****")
+
         predictions, losses = model.run_on_batch(batch, mel)
 
         loss = sum(losses.values())
+                
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -84,3 +87,7 @@ def train():
                 optimizer.state_dict(),
                 os.path.join(model_dir, "last-optimizer-state.pt"),
             )
+
+
+if __name__ == "__main__":
+    train()

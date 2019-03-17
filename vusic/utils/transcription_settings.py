@@ -3,7 +3,7 @@ import torch
 
 from datetime import datetime
 
-__all__ = ["debug", "constants", "hyper_params", "training_settings"]
+__all__ = ["debug", "constants", "training_settings"]
 
 # Constants
 debug = True
@@ -39,11 +39,9 @@ constants = {
     "default_device": DEFAULT_DEVICE,
 }
 
-hyper_params = {"learning_rate": 1e-4}
-
 training_settings = {
     "epochs": 2 if debug else 100,
-    "training_path": os.path.join(HOME, "storage", "transcription", "training"),
+    "training_path": os.path.join(HOME, "storage", "transcription", "data", "MAPS"),
     "batch_size": 8,
     "iterations": 500000,
     "resume_iteration": None,
@@ -54,5 +52,6 @@ training_settings = {
     "learning_rate_decay_steps": 10000,
     "learning_rate_decay_rate": 0.98,
     "clip_gradient_norm": 3,
+    "bilstm_inference_chunk_length": 512,
     "model_dir": "runs/transcription-" + datetime.now().strftime("%y%m%d-%H%M%S"),
 }

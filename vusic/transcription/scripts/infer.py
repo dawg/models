@@ -43,22 +43,14 @@ def transcribe(
     )
 
     os.makedirs(save_path, exist_ok=True)
-    pred_path = os.path.join(
-        save_path, os.path.basename(audio_path) + ".pred.png"
-    )
+    pred_path = os.path.join(save_path, os.path.basename(audio_path) + ".pred.png")
     save_pianoroll(pred_path, onset_pred, frame_pred)
-    midi_path = os.path.join(
-        save_path, os.path.basename(audio_path) + ".pred.mid"
-    )
+    midi_path = os.path.join(save_path, os.path.basename(audio_path) + ".pred.mid")
     save_midi(midi_path, p_est, i_est, v_est)
 
 
 def transcribe_file(
-    audio_path,
-    model_file,
-    save_path,
-    onset_threshold=None,
-    frame_threshold=None,
+    audio_path, model_file, save_path, onset_threshold=None, frame_threshold=None
 ):
     audio_extension = Path(audio_path).suffix.lower()
 
@@ -87,7 +79,7 @@ def transcribe_file(
 
     audio, sr = soundfile.read(audio_path, dtype="int16")
     audio = torch.ShortTensor(audio)
-    audio = audio.to('cpu').float().div_(32768.0)
+    audio = audio.to("cpu").float().div_(32768.0)
     assert sr == constants["sampling_rate"]
 
     model = torch.load(model_file, map_location="cpu").eval()
@@ -95,13 +87,14 @@ def transcribe_file(
 
     transcribe(audio, audio_path, model, save_path, onset_threshold, frame_threshold)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('audio_path', type=str)
-    parser.add_argument('model_file', type=str)
-    parser.add_argument('--save-path', default='transcription_output/')
-    parser.add_argument('--onset-threshold', default=0.5, type=float)
-    parser.add_argument('--frame-threshold', default=0.5, type=float)
+    parser.add_argument("audio_path", type=str)
+    parser.add_argument("model_file", type=str)
+    parser.add_argument("--save-path", default="transcription_output/")
+    parser.add_argument("--onset-threshold", default=0.5, type=float)
+    parser.add_argument("--frame-threshold", default=0.5, type=float)
 
     with torch.no_grad():
         transcribe_file(**vars(parser.parse_args()))

@@ -1,12 +1,14 @@
 import torch
 import torch.nn as nn
-
+from vusic.utils.transcription_settings import training_settings, constants
 
 __all__ = ["BiLstm"]
 
 
 class BiLstm(nn.Module):
-    def __init__(self, debug, in_features, recr_features):
+    inference_chunk_length = training_settings["bilstm_inference_chunk_length"]
+
+    def __init__(self, in_features, recr_features):
         """
         Desc:
             Create implementation of the onset BiLSTM, this feeds into a fully connected layer with 88 neurons 
@@ -19,9 +21,7 @@ class BiLstm(nn.Module):
             out_ features (): 
 
         """
-        inference_chunk_length = 512
-        super(BiLstm, self).__init__()
-        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
+        super().__init__()
         self.rnn = nn.LSTM(
             in_features, recr_features, batch_first=True, bidirectional=True
         )

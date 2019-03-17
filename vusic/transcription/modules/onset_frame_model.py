@@ -4,14 +4,19 @@ import torch.nn.functional as F
 
 from vusic.transcription.modules.kelz_cnn import KelzCnn
 from vusic.transcription.modules.bilstm import BiLstm
-
+from vusic.utils.transcription_settings import training_settings
 
 __all__ = ["OnsetFrameModel"]
 
 
 class OnsetFrameModel(nn.Module):
-    def __init__(self, input_features, output_features, model_complexity=48):
-        super(OnsetFrameModel, self).__init__()
+    def __init__(
+        self,
+        input_features,
+        output_features,
+        model_complexity=training_settings["model_complexity"],
+    ):
+        super().__init__()
 
         fc_size = model_complexity * 16
         lstm_units = model_complexity * 8
@@ -54,7 +59,6 @@ class OnsetFrameModel(nn.Module):
         return onset_pred, offset_pred, activation_pred, frame_pred, velocity_pred
 
     def run_on_batch(self, batch, mel):
-        audio_label = batch["audio"]
         onset_label = batch["onset"]
         offset_label = batch["offset"]
         frame_label = batch["frame"]

@@ -5,24 +5,32 @@ import soundfile
 
 from abc import abstractmethod
 from glob import glob
-from vusic.utils.transcription_settings import constants, debug
+from vusic.utils.transcription_settings import constants, training_settings
 from vusic.utils.midi_utils import parse_midi
 from torch.utils.data import Dataset
 from tqdm import tqdm
+import torch
 
 
 class TranscriptionDataset(Dataset):
     def __init__(
         self,
-        path,
+        path=training_settings["training_path"],
         groups=None,
         sequence_length=None,
         seed=42,
         device=constants["default_device"],
     ):
         self.path = path
-        self.groups = groups if groups is not None else self.get_available_groups()
-        assert all(group in self.get_available_groups() for group in self.groups)
+        self.groups = groups if groups is not None else [
+            "AkPnBcht",
+            "AkPnBsdf",
+            "AkPnCGdD",
+            "AkPnStgb",
+            "SptkBGAm",
+            "SptkBGCl",
+            "StbgTGd2",
+        ]
         self.sequence_length = sequence_length
         self.device = device
         self.random = np.random.RandomState(seed)
@@ -31,13 +39,13 @@ class TranscriptionDataset(Dataset):
 
         print(
             "Loading %d group%s of %s at %s"
-            % (len(groups), "s"[: len(groups) - 1], self.__class__.__name__, path)
+            % (len(self.groups), "s"[: len(self.groups) - 1], self.__class__.__name__, path)
         )
 
-        for group in groups:
+        for group in self.groups:
             for input_files in tqdm(self.files(group), desc="Loading group %s" % group):
                 self.data.append(self.load(*input_files))
-
+        
     def __getitem__(self, index):
         data = self.data[index]
         result = dict(path=data["path"])
@@ -77,21 +85,25 @@ class TranscriptionDataset(Dataset):
 
     def load(self, audio_path, tsv_path):
         """
-        load an audio track and the corresponding labels
+        Desc: 
+            load an audio track and the corresponding labels
 
-        Returns
-        -------
-            A dictionary containing the following data:
+        Args:
+            audio_path (string): path to the flac file
+            tsv_path (string): path to the tsv file
+        
+        Returns:
+            data (dictionary) with the following data:
 
-            audio: torch.ShortTensor, shape = [num_samples]
-                the raw waveform
+                audio (torch.ShortTensort), shape = [num_samples]: the raw waveform
 
-            ramp: torch.ByteTensor, shape = [num_steps, midi_bins]
-                a matrix that contains the number of frames after the corresponding onset
+                labels (torch.ByteTensor), shape = [num_steps, midi_bins]: a matrix that 
+                contains the number of frames after the corresponding onset
 
-            velocity: torch.ByteTensor, shape = [num_steps, midi_bins]
+                velocity (torch.ByteTensor), shape = [num_steps, midi_bins]:
                 a matrix that contains MIDI velocity values at the frame locations
         """
+
         saved_data_path = audio_path.replace(".flac", ".pt").replace(".wav", ".pt")
         if os.path.exists(saved_data_path):
             return torch.load(saved_data_path)
@@ -108,7 +120,6 @@ class TranscriptionDataset(Dataset):
         label = torch.zeros(n_steps, n_keys, dtype=torch.uint8)
         velocity = torch.zeros(n_steps, n_keys, dtype=torch.uint8)
 
-        tsv_path = tsv_path
         midi = np.loadtxt(tsv_path, delimiter="\t", skiprows=1)
 
         for onset, offset, note, vel in midi:
@@ -132,17 +143,6 @@ class TranscriptionDataset(Dataset):
         torch.save(data, saved_data_path)
         return data
 
-    def get_available_groups(self):
-        return [
-            "AkPnBcht",
-            "AkPnBsdf",
-            "AkPnCGdD",
-            "AkPnStgb",
-            "SptkBGAm",
-            "SptkBGCl",
-            "StbgTGd2",
-        ]
-
     def files(self, group):
         flacs = glob(os.path.join(self.path, "flac", "*_%s.flac" % group))
         tsvs = [
@@ -153,20 +153,3 @@ class TranscriptionDataset(Dataset):
         assert all(os.path.isfile(tsv) for tsv in tsvs)
 
         return sorted(zip(flacs, tsvs))
-
-    @classmethod
-    def from_params(cls, params: object):
-        """
-        Desc: 
-            create a TranscriptionDataset from parameters
-
-        Args:
-            param (object): parameters for creating the TranscriptionDataset. Must contain the following
-                root_dir (str): root directory of the dataset
-                transform (optional, str): transform to be applied to each sample upon retrieval
-                training (optional, bool): boolean indicating if this is a training dataset
-        """
-
-        transform = params["transform"] if "transform" in params else None
-
-        return cls(params["root_dir"], transform)

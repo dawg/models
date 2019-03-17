@@ -5,7 +5,7 @@ from librosa.filters import mel
 from librosa.util import pad_center
 from scipy.signal import get_window
 from torch.autograd import Variable
-from vusic.utils.transcription_settings import constants, debug
+from vusic.utils.transcription_settings import constants
 
 
 class STFT(torch.nn.Module):

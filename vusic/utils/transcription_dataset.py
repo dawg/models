@@ -22,15 +22,19 @@ class TranscriptionDataset(Dataset):
         device=constants["default_device"],
     ):
         self.path = path
-        self.groups = groups if groups is not None else [
-            "AkPnBcht",
-            "AkPnBsdf",
-            "AkPnCGdD",
-            "AkPnStgb",
-            "SptkBGAm",
-            "SptkBGCl",
-            "StbgTGd2",
-        ]
+        self.groups = (
+            groups
+            if groups is not None
+            else [
+                "AkPnBcht",
+                "AkPnBsdf",
+                "AkPnCGdD",
+                "AkPnStgb",
+                "SptkBGAm",
+                "SptkBGCl",
+                "StbgTGd2",
+            ]
+        )
         self.sequence_length = sequence_length
         self.device = device
         self.random = np.random.RandomState(seed)
@@ -39,13 +43,18 @@ class TranscriptionDataset(Dataset):
 
         print(
             "Loading %d group%s of %s at %s"
-            % (len(self.groups), "s"[: len(self.groups) - 1], self.__class__.__name__, path)
+            % (
+                len(self.groups),
+                "s"[: len(self.groups) - 1],
+                self.__class__.__name__,
+                path,
+            )
         )
 
         for group in self.groups:
             for input_files in tqdm(self.files(group), desc="Loading group %s" % group):
                 self.data.append(self.load(*input_files))
-        
+
     def __getitem__(self, index):
         data = self.data[index]
         result = dict(path=data["path"])

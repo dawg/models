@@ -65,8 +65,6 @@ class SeparationDataset(Dataset):
             vocals["mg"] = vocals["mg"].type(torch.float)
             vocals["ph"] = vocals["ph"].type(torch.float)
 
-        print(f"file: {self.filenames[idx]}")
-
         sample = {"mix": mix, "vocals": vocals, "fname": self.filenames[idx]}
 
         if self.transform:

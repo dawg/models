@@ -204,18 +204,19 @@ def main():
 
                 epoch_loss.append(loss.item())
 
-            # record losses at the end of every song
-            torch.save(epoch_loss, output_paths["masker_loss"])
+        # record losses at the end of every epoch
+        torch.save(epoch_loss, output_paths["masker_loss"])
+
+        # we are done training! save and record our model state
+        print(f"-- Exporting model...", end="")
+        torch.save(rnn_encoder, output_paths["rnn_encoder"])
+        torch.save(rnn_decoder, output_paths["rnn_decoder"])
+        torch.save(fnn_masker, output_paths["fnn_masker"])
+        torch.save(fnn_denoiser, output_paths["fnn_denoiser"])
+        print(f"done!")
 
         epoch_end = time.time()
 
-    # we are done training! save and record our model state
-    print(f"-- Exporting model...", end="")
-    torch.save(rnn_encoder, output_paths["rnn_encoder"])
-    torch.save(rnn_decoder, output_paths["rnn_decoder"])
-    torch.save(fnn_masker, output_paths["fnn_masker"])
-    torch.save(fnn_denoiser, output_paths["fnn_denoiser"])
-    print(f"done!")
 
 
 if __name__ == "__main__":

@@ -37,3 +37,4 @@ allow_prereleases = true
 format = "pipenv run black ."
 check = "pipenv run black --check ."
 test = "pipenv run pytest"
+train-separation = "python vusic/separation/scripts/training.py"

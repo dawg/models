@@ -11,7 +11,7 @@ __all__ = [
 debug = True
 
 # XXX
-HOME = os.path.expanduser("~") if debug else "/"
+HOME = os.path.expanduser("~") if not debug else "/"
 
 preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "separation"),
@@ -37,7 +37,7 @@ preserved_bins = 744
 
 # context length for RNNs
 context_length = 10
-output_folder = "output" if debug else os.path.join(HOME, "artifacts", "separation")
+output_folder = "output" if debug else os.path.join(HOME, "artifacts")
 
 output_paths = {
     "output_folder": output_folder,
@@ -51,7 +51,7 @@ output_paths = {
 
 training_settings = {
     "epochs": 1 if debug else 100,
-    "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
+    "training_path": os.path.join(HOME,"storage", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,
     "rnn_encoder_params": {

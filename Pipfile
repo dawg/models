@@ -20,7 +20,6 @@ torch = "*"
 matplotlib = "*"
 ipykernel = "*"
 vusic = {editable = true, path = "."}
-botocore = "*"
 librosa = "*"
 ffprobe = "*"
 sounddevice = "*"

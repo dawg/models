@@ -6,6 +6,7 @@ RUN apt-get update && \
   apt-get install -y software-properties-common && \
   add-apt-repository -y ppa:duggan/bats && \
   apt-get update && \
+  apt-get upgrade && \
   apt-get install -y python3 python3-dev python3-pip python3-cffi sudo curl bats
 
 RUN ln -s /usr/bin/python3 /usr/bin/python && \

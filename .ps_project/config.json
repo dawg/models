@@ -1,8 +1,8 @@
 {
   "project": "models",
-  "machineType": "GPU+",
-  "container": "dawgpeople/models:latest",
-  "command": "Li90cmFpbi1zZXBhcmF0aW9uLnNo",
+  "container": "Test-Container",
+  "command": "bnZpZGlhLXNtaQ==",
   "workspace": "/Users/alexodonnell/senior/models",
-  "lastJobId": "jio20loga3iu0"
+  "lastJobId": "j9544tmgmdfpz",
+  "machineType": "GPU+"
 }

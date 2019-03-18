@@ -135,10 +135,10 @@ def main(logger=None):
                 batch_start = batch * batch_size
                 batch_end = (batch + 1) * batch_size
 
-                mix_mg_sequence = mix_mg[0, batch_start:batch_end, :, :]
+                mix_mg_sequence = mix_mg[0, batch_start:batch_end, :, :].to(device)
                 vocal_mg_sequence = vocal_mg[
                     0, batch_start:batch_end, context_length:-context_length, :
-                ]
+                ].to(device)
 
                 # feed through masker
                 m_enc = rnn_encoder(mix_mg_sequence)

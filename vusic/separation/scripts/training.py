@@ -205,7 +205,7 @@ def main():
                 epoch_loss.append(loss.item())
 
         # record losses at the end of every epoch
-        torch.save(epoch_loss, output_paths["masker_loss"])
+        torch.save(epoch_loss, output_paths["loss"])
 
         # we are done training! save and record our model state
         print(f"-- Exporting model...", end="")

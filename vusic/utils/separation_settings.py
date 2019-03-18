@@ -8,10 +8,10 @@ __all__ = [
     "training_settings",
 ]
 
-debug = True
+debug = False
 
 # XXX
-HOME = os.path.expanduser("~") if not debug else "/"
+HOME = os.path.expanduser("~") if debug else "/"
 
 preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "separation"),
@@ -45,7 +45,7 @@ output_paths = {
     "rnn_decoder": os.path.join(output_folder, "rnn_decoder.pth"),
     "fnn_masker": os.path.join(output_folder, "fnn_masker.pth"),
     "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
-    "masker_loss": os.path.join(output_folder, "masker_loss.pth"),
+    "loss": os.path.join(output_folder, "loss.pth"),
     "twin_loss": os.path.join(output_folder, "twin_loss.pth"),
 }
 

@@ -130,7 +130,7 @@ def main():
             mix_mg = sample["mix"]["mg"]
             vocal_mg = sample["vocals"]["mg"]
 
-            print(f"batches in song: {int(mix_mg.shape[1]/batch_size)}")
+            # print(f"batches in song: {int(mix_mg.shape[1]/batch_size)}")
 
             for batch in range(int(mix_mg.shape[1] / batch_size)):
 

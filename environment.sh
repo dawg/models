@@ -26,5 +26,5 @@ if ! command_exists pipenv; then
   pip install --quiet pipenv
 fi
 
-echo "Installing python modules from Pipfile"
-pipenv install --pre --dev --deploy --skip-lock
+# echo "Installing python modules from Pipfile"
+# pipenv install --pre --dev --deploy --skip-lock

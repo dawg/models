@@ -6,7 +6,7 @@ from datetime import datetime
 __all__ = ["debug", "constants", "training_settings"]
 
 # Constants
-debug = True
+debug = False
 HOME = os.path.expanduser("~")
 
 SAMPLING_RATE = 16000

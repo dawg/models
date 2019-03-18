@@ -65,7 +65,7 @@ def train():
         ).transpose(-1, -2)
 
         predictions, losses = model.run_on_batch(batch, mel)
-
+        
         loss = sum(losses.values())
 
         optimizer.zero_grad()

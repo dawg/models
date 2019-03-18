@@ -29,6 +29,9 @@ black = "*"
 mir-eval = "*"
 tensorboardx = "*"
 ffmpy = "*"
+numpy = "*"
+mido = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.6"

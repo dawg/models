@@ -4,12 +4,14 @@
 import argparse
 import os
 
+import time
+
 import librosa as lr
 
 import numpy as np
 import torch
 
-import scipy.io.wavfile as wavfile
+from vusic.utils.audio_helper import read_wav, write_wav
 
 # from helpers.data_feeder import data_feeder_testing, data_process_results_testing
 from vusic.utils.separation_settings import training_settings, debug, model_paths, stft_info
@@ -64,7 +66,7 @@ def separate(source: str, output: str):
     fnn_denoiser.load_state_dict(torch.load(model_paths['fnn_denoiser']))
     print(f"done!", end="\n\n")
 
-    rate, mix = wavfile.read(source)
+    mix, rate = read_wav(source)
     mix = np.transpose(mix).astype(np.float)
     print(f"len: {mix.shape}")
     mix = lr.to_mono(mix);
@@ -93,6 +95,7 @@ def separate(source: str, output: str):
     dtype=np.float32)
 
     print("-- Separating song...")
+    start_time = time.time()
     for batch in range(int(mix_mg.shape[0]/batch_size)):
 
         batch_start = batch * batch_size
@@ -110,6 +113,7 @@ def separate(source: str, output: str):
 
         # append the batch prediction to our vocal preciction
         prediction[batch_start:batch_end, :, :] = temp_prediction.data.cpu().numpy()
+    
     print("-- Saving extracted vocals...")
     prediction.shape = (prediction.shape[0] * prediction.shape[1], stft_info['win_length'])
 
@@ -118,9 +122,10 @@ def separate(source: str, output: str):
     # take the inverse fourier transform of the vocal prediction
     vocals = istft(prediction, mix_ph)
 
-
-    wavfile.write(output, rate, np.transpose(vocals))
+    write_wav(np.transpose(vocals), rate, 16 , output)
     print(vocals.shape)
+
+    print(f"Total time: {time.time()-start_time}")
 
 def main():
     arg_parser = argparse.ArgumentParser(

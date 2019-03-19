@@ -37,7 +37,7 @@ preserved_bins = 744
 
 # context length for RNNs
 context_length = 10
-output_folder = "output" if debug else os.path.join(HOME, "artifacts")
+output_folder = "output" if debug else os.path.join(HOME, "storage")
 
 output_paths = {
     "output_folder": output_folder,
@@ -50,7 +50,7 @@ output_paths = {
 }
 
 training_settings = {
-    "epochs": 1 if debug else 100,
+    "epochs": 1 if debug else 20,
     "training_path": os.path.join(HOME,"storage", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,

@@ -206,14 +206,13 @@ def main(logger=None):
         torch.save(epoch_loss, output_paths["loss"])
 
         # we are done training! save and record our model state
-        logger.info(f"Exporting model...", end="")
-        torch.save(rnn_encoder, output_paths["rnn_encoder"])
-        torch.save(rnn_decoder, output_paths["rnn_decoder"])
-        torch.save(fnn_masker, output_paths["fnn_masker"])
-        torch.save(fnn_denoiser, output_paths["fnn_denoiser"])
+        logger.info(f"Exporting model")
+        torch.save(rnn_encoder.state_dict(), output_paths["rnn_encoder"])
+        torch.save(rnn_decoder.state_dict(), output_paths["rnn_decoder"])
+        torch.save(fnn_masker.state_dict(), output_paths["fnn_masker"])
+        torch.save(fnn_denoiser.state_dict(), output_paths["fnn_denoiser"])
 
         epoch_end = time.time()
-
 
 
 if __name__ == "__main__":

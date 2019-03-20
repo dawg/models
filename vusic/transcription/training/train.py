@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import torch
+import logme
 
 from torch.nn.utils import clip_grad_norm_
 from torch.optim.lr_scheduler import StepLR
@@ -14,8 +15,8 @@ from vusic.transcription.modules.onset_frame_model import OnsetFrameModel
 from vusic.utils.transcription_utils import summary, cycle
 from vusic.transcription.modules.mel import melspectrogram
 
-
-def train():
+@logme.log
+def train(logger=None):
     model_dir = training_settings["model_dir"]
     device = constants["default_device"]
     iterations = training_settings["iterations"]
@@ -32,15 +33,23 @@ def train():
     os.makedirs(model_dir, exist_ok=True)
     writer = SummaryWriter(model_dir)
 
+    logger.info(f"Using: {device}")
+
+    logger.info(f"Loading training data...")
     dataset = TranscriptionDataset(sequence_length=sequence_length)
     loader = DataLoader(dataset, batch_size, shuffle=True)
+    logger.info(f"Training set contains {len(dataset)} songs.")
+
 
     if resume_iteration is None:
+        logger.info(f"Initializing OnsetFrameModel module...")
         model = OnsetFrameModel(
             constants["n_mels"],
             constants["max_midi"] - constants["min_midi"] + 1,
             model_complexity,
         ).to(device)
+
+        logger.info(f"Creating optimizer...")
         optimizer = torch.optim.Adam(model.parameters(), learning_rate)
         resume_iteration = 0
     else:
@@ -56,13 +65,18 @@ def train():
         optimizer, step_size=learning_rate_decay_steps, gamma=learning_rate_decay_rate
     )
 
+    logger.info("Starting Training")
     loop = tqdm(range(resume_iteration + 1, iterations + 1))
     for i, batch in zip(loop, cycle(loader)):
+        logger.info(f"Starting Iteration {i}.....")
+
         scheduler.step()
 
         mel = melspectrogram(
             batch["audio"].reshape(-1, batch["audio"].shape[-1])[:, :-1]
         ).transpose(-1, -2)
+
+        logger.info(f"Mel Spectogram Shape is {mel.shape}")
 
         predictions, losses = model.run_on_batch(batch, mel)
         
@@ -80,6 +94,8 @@ def train():
             writer.add_scalar(key, value.item(), global_step=i)
 
         if i % checkpoint_interval == 0:
+            logger.info(f"Saving iteration {i}.....")
+
             torch.save(model, os.path.join(model_dir, f"model-{i}.pt"))
             torch.save(
                 optimizer.state_dict(),

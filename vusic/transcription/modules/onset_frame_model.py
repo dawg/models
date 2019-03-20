@@ -48,32 +48,17 @@ class OnsetFrameModel(nn.Module):
         )
 
     def forward(self, mel):
-        print("Onset stack")
         onset_pred = self.onset_stack(mel)
-        print(onset_pred.size())
-        print(torch.sum(onset_pred))
-        print("Offset stack")
         offset_pred = self.offset_stack(mel)
-        print(offset_pred.size())
-        print(torch.sum(offset_pred))
-        print("Activation stack")
         activation_pred = self.frame_stack(mel)
-        print(activation_pred.size())
-        print(torch.sum(activation_pred))
-        print("Combined cat")
+
         combined_pred = torch.cat(
             [onset_pred.detach(), offset_pred.detach(), activation_pred], dim=-1
         )
-        print(combined_pred.size())
-        print(torch.sum(combination_pred))
-        print("Combined prediction")
+
         frame_pred = self.combined_stack(combined_pred)
-        print(frame_pred.size())
-        print(torch.sum(frame_pred))
-        print("Velocity stack")
         velocity_pred = self.velocity_stack(mel)
-        print(velocity_pred.size())
-        print(torch.sum(velocity_pred))
+
         return onset_pred, offset_pred, activation_pred, frame_pred, velocity_pred
 
     def run_on_batch(self, batch, mel):

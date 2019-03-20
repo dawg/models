@@ -27,7 +27,6 @@ class BiLstm(nn.Module):
         )
 
     def forward(self, x):
-        print("bilstm")
 
         if self.training:
             return self.rnn(x)[0]

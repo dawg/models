@@ -21,7 +21,7 @@ N_MELS = 229
 MEL_FMIN = 30
 MEL_FMAX = SAMPLING_RATE // 2
 WINDOW_LENGTH = 2048
-DEFAULT_DEVICE = "cuda" if not debug and torch.cuda.is_available() else "cpu"
+DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 constants = {
     "sampling_rate": SAMPLING_RATE,
@@ -43,9 +43,9 @@ training_settings = {
     "epochs": 2 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "transcription", "data", "MAPS"),
     "batch_size": 8,
-    "iterations": 1,
+    "iterations": 100000,
     "resume_iteration": None,
-    "checkpoint_interval": 20,
+    "checkpoint_interval": 500,
     "sequence_length": 327680,
     "model_complexity": 48,
     "learning_rate": 0.0006,

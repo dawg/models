@@ -8,7 +8,6 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
-from vusic.transcription.training.evaluate import evaluate
 from vusic.utils.transcription_settings import constants, training_settings
 from vusic.utils.transcription_dataset import TranscriptionDataset
 from vusic.transcription.modules.onset_frame_model import OnsetFrameModel

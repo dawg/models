@@ -8,6 +8,7 @@ black = "*"
 pytest = "*"
 
 [packages]
+soundfile = "*"
 logme = "*"
 musdb = "*"
 "boto3" = "*"

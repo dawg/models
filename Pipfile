@@ -32,7 +32,6 @@ numpy = "*"
 mido = "*"
 pillow = "*"
 torchvision = "*"
-cuda100 = "*"
 
 [requires]
 python_version = "3.6"

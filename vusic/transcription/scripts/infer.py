@@ -33,14 +33,18 @@ def transcribe(
     frame_pred.squeeze_(0).relu_()
     velocity_pred.squeeze_(0).relu_()
 
+    p_est, i_est, v_est = extract_notes(
+        onset_pred,
+        frame_pred,
+        velocity_pred,
+        onset_threshold,
+        frame_threshold,
+    )
+
     scaling = constants["hop_length"] / constants["sampling_rate"]
 
     i_est = (i_est * scaling).reshape(-1, 2)
     p_est = np.array([midi_to_hz(constants["min_midi"] + midi) for midi in p_est])
-
-    p_est, i_est, v_est = extract_notes(
-        onset_pred, frame_pred, velocity_pred, onset_threshold, frame_threshold
-    )
 
     os.makedirs(save_path, exist_ok=True)
     pred_path = os.path.join(save_path, os.path.basename(audio_path) + ".pred.png")
@@ -78,15 +82,13 @@ def transcribe_file(
         return
 
     audio, sr = soundfile.read(audio_path, dtype="int16")
-    audio = torch.ShortTensor(audio)
-    audio = audio.to("cpu").float().div_(32768.0)
-    assert sr == constants["sampling_rate"]
 
     model = torch.load(model_file, map_location="cpu").eval()
     summary(model)
 
+    audio = torch.ShortTensor(audio)
+    audio = audio.to('cpu').float().div_(32768.0)
     transcribe(audio, audio_path, model, save_path, onset_threshold, frame_threshold)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

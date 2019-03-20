@@ -27,14 +27,14 @@ class KelzCnn(nn.Module):
         self.cnn = nn.Sequential(
             # Layer 0
             # conv: 1xHxw   --> 48xHxW
-            nn.Conv2d(1, out_features // 16, 3, padding=1),
+            nn.Conv2d(1, out_features // 16, (3, 3), padding=1),
             # norm: same shape as ^
             nn.BatchNorm2d(out_features // 16),
             # relu: same shape as ^
             nn.ReLU(),
             # Layer 1
             # conv:
-            nn.Conv2d(out_features // 16, out_features // 16, 3, padding=1),
+            nn.Conv2d(out_features // 16, out_features // 16, (3,3), padding=1),
             # norm: same shape as ^
             nn.BatchNorm2d(out_features // 16),
             # relu: same shape as ^
@@ -45,7 +45,7 @@ class KelzCnn(nn.Module):
             # drop: same shape as ^
             nn.Dropout(0.25),
             # conv:
-            nn.Conv2d(out_features // 16, out_features // 8, 3, padding=1),
+            nn.Conv2d(out_features // 16, out_features // 8, (3,3), padding=1),
             # norm: same shape as ^
             nn.BatchNorm2d(out_features // 8),
             # relu: same shape as ^

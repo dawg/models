@@ -43,8 +43,8 @@ training_settings = {
     "epochs": 2 if debug else 100,
     "training_path": os.path.join(HOME, "storage", "transcription", "data", "MAPS"),
     "batch_size": 8,
-    "iterations": 1000,
-    "resume_iteration": 200,
+    "iterations": 1,
+    "resume_iteration": None,
     "checkpoint_interval": 20,
     "sequence_length": 327680,
     "model_complexity": 48,
@@ -53,5 +53,5 @@ training_settings = {
     "learning_rate_decay_rate": 0.98,
     "clip_gradient_norm": 3,
     "bilstm_inference_chunk_length": 512,
-    "model_dir": "runs/transcription-190319-011054",
+    "model_dir": "runs/transcription-" + datetime.now().strftime("%y%m%d-%H%M%S"),
 }

@@ -65,6 +65,7 @@ class KelzCnn(nn.Module):
         )
 
     def forward(self, mel):
+        print("Kelz")
         x = mel.view(mel.size(0), 1, mel.size(1), mel.size(2))
         x = self.cnn(x)
         x = x.transpose(1, 2).flatten(-2)

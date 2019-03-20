@@ -4,7 +4,6 @@ import numpy as np
 import os
 from vusic.utils.separation_settings import debug
 
-
 class SeparationDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None):
         """
@@ -57,13 +56,14 @@ class SeparationDataset(Dataset):
         mix = torch.load(mixpath)
         vocals = torch.load(vocalpath)
 
-        if debug:
-            mix["mg"] = mix["mg"].type(torch.float)
-            mix["ph"] = mix["ph"].type(torch.float)
-            vocals["mg"] = vocals["mg"].type(torch.float)
-            vocals["ph"] = vocals["ph"].type(torch.float)
+        # if we're debugging on cpu, we need to convert to float
+        # this is because half tensors are not supported on CPU
+        mix["mg"] = mix["mg"].type(torch.float)
+        mix["ph"] = mix["ph"].type(torch.float)
+        vocals["mg"] = vocals["mg"].type(torch.float)
+        vocals["ph"] = vocals["ph"].type(torch.float)
 
-        sample = {"mix": mix, "vocals": vocals}
+        sample = {"mix": mix, "vocals": vocals, "fname": self.filenames[idx]}
 
         if self.transform:
             sample = self.transform(sample)

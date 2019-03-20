@@ -15,12 +15,11 @@ musdb = "*"
 requests = "*"
 tqdm = "*"
 scipy = "*"
-torch = "*"
+torch = {file = "https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl"}
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
 vusic = {editable = true, path = "."}
-botocore = "*"
 librosa = "*"
 ffprobe = "*"
 sounddevice = "*"
@@ -32,6 +31,8 @@ ffmpy = "*"
 numpy = "*"
 mido = "*"
 pillow = "*"
+torchvision = "*"
+cuda100 = "*"
 
 [requires]
 python_version = "3.6"
@@ -43,3 +44,5 @@ allow_prereleases = true
 format = "pipenv run black ."
 check = "pipenv run black --check ."
 test = "pipenv run pytest"
+train-separation = "python vusic/separation/scripts/training.py"
+train-transcription = "python vusic/transcription/training/train.py"

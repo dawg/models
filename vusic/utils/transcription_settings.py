@@ -53,5 +53,5 @@ training_settings = {
     "learning_rate_decay_rate": 0.98,
     "clip_gradient_norm": 3,
     "bilstm_inference_chunk_length": 512,
-    "model_dir": "runs/transcription-" + datetime.now().strftime("%y%m%d-%H%M%S"),
+    "model_dir": "/storage/runs/transcription-" + datetime.now().strftime("%y%m%d-%H%M%S"),
 }

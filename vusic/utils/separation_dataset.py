@@ -4,6 +4,7 @@ import numpy as np
 import os
 from vusic.utils.separation_settings import debug
 
+
 class SeparationDataset(Dataset):
     def __init__(self, root_dir: str, transform: callable = None):
         """

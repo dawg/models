@@ -110,7 +110,7 @@ def extract_notes(onsets, frames, velocity, onset_threshold=0.5, frame_threshold
     pitches = []
     intervals = []
     velocities = []
-    
+
     for nonzero in onset_diff.nonzero():
         frame = nonzero[0].item()
         pitch = nonzero[1].item()

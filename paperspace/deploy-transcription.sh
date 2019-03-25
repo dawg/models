@@ -7,5 +7,5 @@
 # echo Done!
 
 echo "Creating piano transcription job..."
-paperspace jobs create --container "dawgpeople/models:latest" --machineType "GPU+" --command "./train-transcription.sh"
+paperspace jobs create --container "dawgpeople/models:latest" --machineType "P5000" --command "./train-transcription.sh"
 echo "Done!"

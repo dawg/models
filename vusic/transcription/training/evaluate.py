@@ -2,7 +2,8 @@ import argparse
 import os
 import sys
 import numpy as np
-import vusic.utils.transcription_dataset as dataset_module
+import torch
+from vusic.utils.transcription_dataset import TranscriptionDataset
 
 from collections import defaultdict
 from mir_eval.multipitch import evaluate as evaluate_frames
@@ -117,8 +118,6 @@ def evaluate(data, model, onset_threshold=0.5, frame_threshold=0.5, save_path=No
         for key, loss in frame_metrics.items():
             metrics["metric/frame/" + key.lower().replace(" ", "_")].append(loss)
 
-        # TODO (amir) change this so that it by default saves everything.
-        #       just need to figure out where
         if save_path is not None:
             os.makedirs(save_path, exist_ok=True)
             label_path = os.path.join(
@@ -137,21 +136,22 @@ def evaluate(data, model, onset_threshold=0.5, frame_threshold=0.5, save_path=No
     return metrics
 
 
-def evaluate_file(
+def evaluate_model(
     model_file,
-    dataset,
-    dataset_group,
-    sequence_length,
-    save_path,
-    onset_threshold,
-    frame_threshold,
-    device,
+    dataset_groups=None,
+    sequence_length=None,
+    save_path=None,
+    onset_threshold=0.5,
+    frame_threshold=0.5,
+    device="cpu",
 ):
-    dataset_class = getattr(dataset_module, dataset)
     kwargs = {"sequence_length": sequence_length, "device": device}
-    if dataset_group is not None:
-        kwargs["groups"] = [dataset_group]
-    dataset = dataset_class(**kwargs)
+    if dataset_groups is not None:
+        kwargs["groups"] = [dataset_groups]
+    else:
+        kwargs["groups"] = ["ENSTDkAm", "ENSTDkCl"]
+
+    dataset = TranscriptionDataset(**kwargs)
 
     model = torch.load(model_file, map_location=device).eval()
     summary(model)
@@ -168,4 +168,6 @@ def evaluate_file(
             )
 
 
-# TODO create a main to run evaluation
+if __name__ == "__main__":
+    with torch.no_grad():
+        evaluate_model(model_file=sys.argv[1])

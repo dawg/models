@@ -20,11 +20,6 @@ esac
 
 sudo apt-get install -y build-essential libasound2-dev libjack-dev >/dev/null
 
-echo "Installing apt-get libsndfile"
-sudo apt-get install libsndfile1
-
-
-
 if ! command_exists pipenv; then
   echo "Installing pipenv"
   pip install --quiet pipenv

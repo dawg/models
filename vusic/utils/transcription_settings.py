@@ -3,10 +3,11 @@ import torch
 
 from datetime import datetime
 
-__all__ = ["debug", "constants", "training_settings"]
+__all__ = ["debug", "constants", "training_settings", "inference_settings"]
 
 # Constants
 debug = False
+
 HOME = os.path.expanduser("~")
 
 SAMPLING_RATE = 16000
@@ -44,8 +45,8 @@ training_settings = {
     "training_path": os.path.join(HOME, "storage", "transcription", "data", "MAPS"),
     "batch_size": 8,
     "iterations": 100000,
-    "resume_iteration": None,
-    "checkpoint_interval": 500,
+    "resume_iteration": 45000,
+    "checkpoint_interval": 5000,
     "sequence_length": 327680,
     "model_complexity": 48,
     "learning_rate": 0.0006,
@@ -53,5 +54,7 @@ training_settings = {
     "learning_rate_decay_rate": 0.98,
     "clip_gradient_norm": 3,
     "bilstm_inference_chunk_length": 512,
-    "model_dir": "/storage/runs/transcription-" + datetime.now().strftime("%y%m%d-%H%M%S"),
+    "model_dir": "/runs/transcription-190320-205138",
 }
+
+inference_settings = {"trained_model_dir": os.path.join(HOME, "Desktop/model-45000.pt")}

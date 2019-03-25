@@ -30,6 +30,7 @@ from vusic.separation.modules import (
     FnnDenoiser,
 )
 
+
 @logme.log
 def main(logger=None):
     # set seed for consistency

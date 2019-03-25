@@ -51,7 +51,7 @@ output_paths = {
 
 training_settings = {
     "epochs": 1 if debug else 20,
-    "training_path": os.path.join(HOME,"storage", "pt_f_train"),
+    "training_path": os.path.join(HOME, "storage", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,
     "rnn_encoder_params": {

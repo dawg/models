@@ -14,6 +14,7 @@ from vusic.transcription.modules.onset_frame_model import OnsetFrameModel
 from vusic.utils.transcription_utils import summary, cycle
 from vusic.transcription.modules.mel import melspectrogram
 
+
 @logme.log
 def train(logger=None):
     model_dir = training_settings["model_dir"]
@@ -38,7 +39,6 @@ def train(logger=None):
     dataset = TranscriptionDataset(sequence_length=sequence_length)
     loader = DataLoader(dataset, batch_size, shuffle=True)
     logger.info(f"Training set contains {len(dataset)} songs.")
-
 
     if resume_iteration is None:
         logger.info(f"Initializing OnsetFrameModel module...")
@@ -75,10 +75,8 @@ def train(logger=None):
             batch["audio"].reshape(-1, batch["audio"].shape[-1])[:, :-1]
         ).transpose(-1, -2)
 
-        logger.info(f"Mel Spectogram Shape is {mel.shape}")
-
         predictions, losses = model.run_on_batch(batch, mel)
-        
+
         loss = sum(losses.values())
 
         optimizer.zero_grad()

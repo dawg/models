@@ -14,11 +14,11 @@ class BiLstm(nn.Module):
             Create implementation of the onset BiLSTM, this feeds into a fully connected layer with 88 neurons 
 
         Args:
-            debug - debug mode
+            debug (bool): debug mode - Using CUDA?
 
-            in_features ():
+            in_features (int): # of input features
 
-            out_ features (): 
+            out_ features (int): # of output features
 
         """
         super().__init__()

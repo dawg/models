@@ -20,7 +20,7 @@ class RnnDecoder(nn.Module):
         self.input_size = input_size
 
         # create gated recurrent unit cells in the shape of our input
-        self.gru_dec = nn.GRUCell(self.input_size, self.input_size)
+        self.gru = nn.GRUCell(self.input_size, self.input_size)
 
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
@@ -33,16 +33,16 @@ class RnnDecoder(nn.Module):
         """
 
         # init input hidden weights
-        nn.init.xavier_normal_(self.gru_dec.weight_ih)
+        nn.init.xavier_normal_(self.gru.weight_ih)
 
         # init hidden^2 weights
-        nn.init.orthogonal_(self.gru_dec.weight_hh)
+        nn.init.orthogonal_(self.gru.weight_hh)
 
         # init input hidden bias
-        self.gru_dec.bias_ih.data.zero_()
+        self.gru.bias_ih.data.zero_()
 
         # init hidden^2 bias
-        self.gru_dec.bias_hh.data.zero_()
+        self.gru.bias_hh.data.zero_()
 
     @classmethod
     def from_params(cls, params):
@@ -75,7 +75,7 @@ class RnnDecoder(nn.Module):
         )
 
         for t in range(sequence_length):
-            m_h_dec = self.gru_dec(m_enc[:, t, :], m_h_dec)
+            m_h_dec = self.gru(m_enc[:, t, :], m_h_dec)
             m_dec[:, t, :] = m_h_dec
 
         return m_dec

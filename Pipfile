@@ -19,13 +19,14 @@ torch = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
-vusic = {editable = true, path = "."}
+vusic = {editable = true,path = "."}
 botocore = "*"
 librosa = "*"
 ffprobe = "*"
 sounddevice = "*"
 protobuf-to-dict = "*"
 black = "*"
+mir-eval = "*"
 
 [requires]
 python_version = "3.6"

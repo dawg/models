@@ -16,7 +16,7 @@ if __name__ == "__main__":
     HOME = os.path.expanduser("~")
     TEST = os.path.join(HOME, "storage", "separation", "pt_f_test")
     TRAIN = os.path.join(HOME, "storage", "separation", "pt_f_train")
-    train_ds = SeparationDataset(TRAIN)
+    # train_ds = SeparationDataset(TRAIN)
     # test_ds = SeparationDataset(TEST)
 
     print(f"Training set contains {len(train_ds)} samples.")
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # plt.title("Logarithmic Frequency Power Spectrogram of ")
     # plt.show()
 
-    x = torch.load("output/masker_loss.pth")
+    x = torch.load(os.path.join(HOME, "senior", "trainedm40", "loss.pth"))
 
     print(f"size {len(x)}")
     plt.figure(1)

@@ -78,7 +78,10 @@ class ISTFT(nn.Module):
         time_domain_signal = np.delete(time_domain_signal, range(3 * self.hop_length))
         time_domain_signal = np.delete(
             time_domain_signal,
-            range(time_domain_signal.size - (3 * self.hop_length + 1), time_domain_signal.size),
+            range(
+                time_domain_signal.size - (3 * self.hop_length + 1),
+                time_domain_signal.size,
+            ),
         )
 
         return time_domain_signal
@@ -114,6 +117,7 @@ def _i_dft(magnitude_spect, phase, window_size):
 
     return time_domain_signal
 
+
 def _gl_alg(window_size, hop, fft_size=4096):
     """
         Compute ideal synthesis window
@@ -124,13 +128,13 @@ def _gl_alg(window_size, hop, fft_size=4096):
         Apr 1984.
     """
     syn_w = signal.hamming(window_size) / np.sqrt(fft_size)
-    syn_w_prod = syn_w ** 2.
+    syn_w_prod = syn_w ** 2.0
     syn_w_prod.shape = (window_size, 1)
     redundancy = int(window_size / hop)
     env = np.zeros((window_size, 1))
 
     for k in range(-redundancy, redundancy + 1):
-        env_ind = (hop * k)
+        env_ind = hop * k
         win_ind = np.arange(1, window_size + 1)
         env_ind += win_ind
 

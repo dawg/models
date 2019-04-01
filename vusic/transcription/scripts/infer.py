@@ -18,11 +18,12 @@ from vusic.utils.transcription_utils import (
     save_pianoroll,
 )
 
+
 def transcribe(
     audio, audio_path, model, save_path, onset_threshold=0.5, frame_threshold=0.5
 ):
     mel = melspectrogram(audio.reshape(-1, audio.shape[-1])[:, :-1]).transpose(-1, -2)
-    
+
     onset_pred, offset_pred, _, frame_pred, velocity_pred = model(mel)
     onset_pred.squeeze_(0).relu_()
     offset_pred.squeeze_(0).relu_()
@@ -87,12 +88,14 @@ def transcribe_file(
 
     transcribe(audio, audio_path, model, save_path, onset_threshold, frame_threshold)
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("audio_path", type=str)
 
     with torch.no_grad():
         transcribe_file(**vars(parser.parse_args()))
+
 
 if __name__ == "__main__":
     main()

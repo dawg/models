@@ -26,7 +26,6 @@ sounddevice = "*"
 protobuf-to-dict = "*"
 black = "*"
 torchvision = "*"
-cuda100 = "*"
 
 [requires]
 python_version = "3.6"

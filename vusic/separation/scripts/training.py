@@ -19,7 +19,7 @@ from vusic.utils.separation_settings import (
     stft_info,
     output_paths,
 )
-from vusic.utils.transforms import overlap_transform
+from vusic.utils.transforms import overlap_transform, ideal_masking
 from vusic.utils.objectives import kl, l2, l2_squared, sparse_penalty
 from vusic.separation.modules import (
     RnnDecoder,
@@ -33,14 +33,14 @@ from vusic.separation.modules import (
 @logme.log
 def main(logger=None):
     # set seed for consistency
-    torch.manual_seed(5)
+    # torch.manual_seed(5)
 
     logger.info(f"\n Starting training. Debug mode: {debug}")
     device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
     logger.info(f"CUDA: {torch.cuda.is_available()}")
 
     batch_size = training_settings["batch_size"]
-    context_length = training_settings["rnn_encoder_params"]["context_length"]
+    context_length = training_settings["context_length"]
 
     logger.info(f"Using: {device}")
 
@@ -106,6 +106,8 @@ def main(logger=None):
         lr=hyper_params["learning_rate"],
     )
 
+    # TODO Check to see if we're resuming training and if so load the model
+
     sequence_length = training_settings["sequence_length"]
     context_length = training_settings["rnn_encoder_params"]["context_length"]
 
@@ -123,12 +125,12 @@ def main(logger=None):
 
         for i, sample in enumerate(dataloader):
 
-            logger.info(f"Sample {i}: {sample['fname']}, {sample['mix']['mg'].size()}")
+            logger.info(f"Sample {i}: {sample['fname']}")
 
             mix_mg = sample["mix"]["mg"]
             vocal_mg = sample["vocals"]["mg"]
 
-            # logger.info(f"batches in song: {int(mix_mg.shape[1]/batch_size)}")
+            vocal_mg = ideal_masking(mix_mg, vocal_mg, mix_mg) * 2
 
             for batch in range(int(mix_mg.shape[1] / batch_size)):
 
@@ -211,8 +213,10 @@ def main(logger=None):
         torch.save(rnn_decoder.state_dict(), output_paths["rnn_decoder"])
         torch.save(fnn_masker.state_dict(), output_paths["fnn_masker"])
         torch.save(fnn_denoiser.state_dict(), output_paths["fnn_denoiser"])
-
+        torch.save(optimizer.state_dict(), output_paths["optimizer"])
         epoch_end = time.time()
+
+        logger.info(f"Epoch time: {epoch_end-epoch_start}")
 
 
 if __name__ == "__main__":

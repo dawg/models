@@ -46,11 +46,12 @@ output_paths = {
     "fnn_masker": os.path.join(output_folder, "fnn_masker.pth"),
     "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
     "loss": os.path.join(output_folder, "loss.pth"),
+    "optimizer": os.path.join(output_folder, "separation_optimizer.pth"),
     "twin_loss": os.path.join(output_folder, "twin_loss.pth"),
 }
 
 training_settings = {
-    "epochs": 1 if debug else 20,
+    "epochs": 1 if debug else 100,
     "training_path": os.path.join(HOME,"storage", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,

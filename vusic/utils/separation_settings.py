@@ -6,6 +6,7 @@ __all__ = [
     "stft_info",
     "hyper_params",
     "training_settings",
+    "model_paths",
 ]
 
 debug = False
@@ -48,6 +49,18 @@ output_paths = {
     "loss": os.path.join(output_folder, "loss.pth"),
     "optimizer": os.path.join(output_folder, "separation_optimizer.pth"),
     "twin_loss": os.path.join(output_folder, "twin_loss.pth"),
+    "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
+
+}
+
+model_folder = os.path.join(HOME, "senior", "trained")
+
+model_paths = {
+    "model_folder": model_folder,
+    "rnn_encoder": os.path.join(model_folder, "rnn_encoder.pth"),
+    "rnn_decoder": os.path.join(model_folder, "rnn_decoder.pth"),
+    "fnn_masker": os.path.join(model_folder, "fnn_masker.pth"),
+    "fnn_denoiser": os.path.join(model_folder, "fnn_denoiser.pth"),
 }
 
 training_settings = {

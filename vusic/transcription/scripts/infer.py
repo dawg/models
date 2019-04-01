@@ -7,8 +7,6 @@ import torch
 
 from pathlib import Path
 from mir_eval.util import midi_to_hz
-from scipy.stats import hmean
-from tqdm import tqdm
 from ffmpy import FFmpeg
 from vusic.transcription.modules.mel import melspectrogram
 from vusic.utils.transcription_settings import constants, inference_settings
@@ -20,15 +18,12 @@ from vusic.utils.transcription_utils import (
     save_pianoroll,
 )
 
-
 def transcribe(
     audio, audio_path, model, save_path, onset_threshold=0.5, frame_threshold=0.5
 ):
-    summary(model)
     mel = melspectrogram(audio.reshape(-1, audio.shape[-1])[:, :-1]).transpose(-1, -2)
-    print(mel.shape)
+    
     onset_pred, offset_pred, _, frame_pred, velocity_pred = model(mel)
-
     onset_pred.squeeze_(0).relu_()
     offset_pred.squeeze_(0).relu_()
     frame_pred.squeeze_(0).relu_()
@@ -44,8 +39,6 @@ def transcribe(
     p_est = np.array([midi_to_hz(constants["min_midi"] + midi) for midi in p_est])
 
     os.makedirs(save_path, exist_ok=True)
-    pred_path = os.path.join(save_path, os.path.basename(audio_path) + ".pred.png")
-    save_pianoroll(pred_path, onset_pred, frame_pred)
     midi_path = os.path.join(save_path, os.path.basename(audio_path) + ".pred.mid")
     save_midi(midi_path, p_est, i_est, v_est)
 
@@ -62,7 +55,7 @@ def transcribe_file(
     if audio_extension == ".wav":
         # convert to flac
         wav_path = audio_path
-        flac_path = audio_path.replace("wav", ".flac").replace("WAV", "flac")
+        flac_path = audio_path.replace(".wav", ".flac").replace(".WAV", ".flac")
 
         ff = FFmpeg(
             inputs={wav_path: "-y -loglevel fatal"},
@@ -94,10 +87,12 @@ def transcribe_file(
 
     transcribe(audio, audio_path, model, save_path, onset_threshold, frame_threshold)
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("audio_path", type=str)
 
     with torch.no_grad():
         transcribe_file(**vars(parser.parse_args()))
+
+if __name__ == "__main__":
+    main()

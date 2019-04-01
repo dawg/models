@@ -16,8 +16,6 @@ class KelzCnn(nn.Module):
             W = width        
 
         Args:
-            debug (bool): debug mode - using CUDA?
-
             in_features (int): # of input features
 
             out_features (int): # of output features

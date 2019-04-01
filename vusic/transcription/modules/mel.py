@@ -93,14 +93,6 @@ class MelSpectrogram(torch.nn.Module):
         self.register_buffer("mel_basis", mel_basis)
 
     def forward(self, y):
-        """Computes mel-spectrograms from a batch of waves
-        PARAMS
-        ------
-        y: Variable(torch.FloatTensor) with shape (B, T) in range [-1, 1]
-        RETURNS
-        -------
-        mel_output: torch.FloatTensor of shape (B, T, n_mels)
-        """
         assert torch.min(y.data) >= -1
         assert torch.max(y.data) <= 1
 
@@ -111,7 +103,6 @@ class MelSpectrogram(torch.nn.Module):
         return mel_output
 
 
-# the default melspectrogram converter across the project
 melspectrogram = MelSpectrogram(
     constants["n_mels"],
     constants["sampling_rate"],

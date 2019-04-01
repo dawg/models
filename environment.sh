@@ -18,7 +18,6 @@ case ${OS} in
   *) ;;
 esac
 
-echo "Installing apt-get dependencies"
 sudo apt-get install -y build-essential libasound2-dev libjack-dev >/dev/null
 
 if ! command_exists pipenv; then

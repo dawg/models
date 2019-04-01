@@ -50,7 +50,6 @@ output_paths = {
     "optimizer": os.path.join(output_folder, "separation_optimizer.pth"),
     "twin_loss": os.path.join(output_folder, "twin_loss.pth"),
     "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
-
 }
 
 model_folder = os.path.join(HOME, "senior", "trained")
@@ -65,7 +64,7 @@ model_paths = {
 
 training_settings = {
     "epochs": 1 if debug else 100,
-    "training_path": os.path.join(HOME,"storage", "pt_f_train"),
+    "training_path": os.path.join(HOME, "storage", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,
     "rnn_encoder_params": {

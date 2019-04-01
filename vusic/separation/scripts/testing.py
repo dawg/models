@@ -20,12 +20,7 @@ from vusic.utils.separation_settings import (
 )
 from vusic.utils.transforms import overlap_transform
 from vusic.utils.objectives import kl, l2
-from vusic.separation.modules import (
-    RnnDecoder,
-    RnnEncoder,
-    FnnMasker,
-    FnnDenoiser,
-)
+from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker, FnnDenoiser
 
 
 def main():
@@ -68,10 +63,10 @@ def main():
     print(f"done!", end="\n\n")
 
     print("-- Loading models...")
-    rnn_encoder.load_state_dict(torch.load(output_paths['rnn_encoder'])).to(device)
-    rnn_decoder.load_state_dict(torch.load(output_paths['rnn_decoder'])).to(device)
-    fnn_masker.load_state_dict(torch.load(output_paths['fnn_masker'])).to(device)
-    fnn_denoiser.load_state_dict(torch.load(output_paths['fnn_denoiser'])).to(device)
+    rnn_encoder.load_state_dict(torch.load(output_paths["rnn_encoder"])).to(device)
+    rnn_decoder.load_state_dict(torch.load(output_paths["rnn_decoder"])).to(device)
+    fnn_masker.load_state_dict(torch.load(output_paths["fnn_masker"])).to(device)
+    fnn_denoiser.load_state_dict(torch.load(output_paths["fnn_denoiser"])).to(device)
     print(f"done!", end="\n\n")
 
     sequence_length = training_settings["sequence_length"]
@@ -89,7 +84,7 @@ def main():
 
         print(f"batches in song: {int(mix_mg.shape[1]/batch_size)}")
 
-        for batch in range(int(mix_mg.shape[1]/batch_size)):
+        for batch in range(int(mix_mg.shape[1] / batch_size)):
 
             batch_start = batch * batch_size
             batch_end = (batch + 1) * batch_size
@@ -104,14 +99,8 @@ def main():
             # denoiser
             temp_prediction = fnn_denoiser(temp_prediction)
 
-            
-
-
-        
-
-
-
     test_end = time.time()
+
 
 if __name__ == "__main__":
     main()

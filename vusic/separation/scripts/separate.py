@@ -23,7 +23,7 @@ from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker, FnnDenoi
 
 
 @logme.log
-def separate(source: str, logger=None):
+def separate(source: str, output: str, logger=None):
     """
         Separate audio contained in source
     """
@@ -32,7 +32,6 @@ def separate(source: str, logger=None):
     context_length = training_settings["context_length"]
     sequence_length = training_settings["sequence_length"]
     win_length = stft_info["win_length"]
-    output = os.path.dirname(source)
 
     device = "cpu"
 
@@ -134,9 +133,13 @@ def main():
         description="Script to separate audio!",
     )
 
-    arg_parser.add_argument("source", type=str)
-    
-    separate(**vars(arg_parser.parse_args()))
+    arg_parser.add_argument("source_file", type=str)
+
+    args = arg_parser.parse_args()
+    source_file = args.source_file
+
+    print(source_file)
+    separate(source_file, "{}_voice.wav".format(source_file))
 
 
 if __name__ == "__main__":

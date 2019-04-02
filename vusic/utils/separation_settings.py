@@ -50,7 +50,7 @@ output_paths = {
     "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
 }
 
-model_folder = os.path.join(HOME, "senior", "trainedm40")
+model_folder = os.path.join(HOME, "Desktop")
 
 model_paths = {
     "model_folder": model_folder,

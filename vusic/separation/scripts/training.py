@@ -1,6 +1,7 @@
 import math
 import time
 import os
+import logme
 
 import torch
 import torch.nn
@@ -18,7 +19,7 @@ from vusic.utils.separation_settings import (
     stft_info,
     output_paths,
 )
-from vusic.utils.transforms import overlap_transform
+from vusic.utils.transforms import overlap_transform, ideal_masking
 from vusic.utils.objectives import kl, l2, l2_squared, sparse_penalty
 from vusic.separation.modules import (
     RnnDecoder,
@@ -30,28 +31,30 @@ from vusic.separation.modules import (
 )
 
 
-def main():
+@logme.log
+def main(logger=None):
     # set seed for consistency
-    torch.manual_seed(5)
+    # torch.manual_seed(5)
 
+    logger.info(f"\n Starting training. Debug mode: {debug}")
     device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
+    logger.info(f"CUDA: {torch.cuda.is_available()}")
 
     batch_size = training_settings["batch_size"]
-    context_length = training_settings["rnn_encoder_params"]["context_length"]
+    context_length = training_settings["context_length"]
 
-    print(f"\n-- Starting training. Debug mode: {debug}")
-    print(f"-- Using: {device}", end="\n\n")
+    logger.info(f"Using: {device}")
 
     # init dataset
-    print(f"-- Loading training data...", end="")
+    logger.info(f"Loading training data...")
     train_ds = SeparationDataset(
         training_settings["training_path"], transform=overlap_transform
     )
     dataloader = DataLoader(train_ds, shuffle=True)
-    print(f"done! Training set contains {len(train_ds)} samples.", end="\n\n")
+    logger.info(f"Training set contains {len(train_ds)} samples.")
 
     # create nn modules
-    print(f"-- Initializing NN modules...", end="")
+    logger.info(f"Initializing NN modules...")
     # masker
     rnn_encoder = RnnEncoder.from_params(training_settings["rnn_encoder_params"]).to(
         device
@@ -81,10 +84,8 @@ def main():
         training_settings["affine_transform_params"]
     ).to(device)
 
-    print(f"done!", end="\n\n")
-
     # set up objective functions
-    print(f"-- Creating objective functions...", end="")
+    logger.info(f"Creating objective functions...")
 
     masker_loss = kl
     twin_loss = kl
@@ -93,10 +94,8 @@ def main():
     masker_reg = sparse_penalty
     denoiser_reg = l2_squared
 
-    print(f"done!", end="\n\n")
-
     # optimizer
-    print(f"-- Creating optimizer...", end="")
+    logger.info(f"Creating optimizer...")
     optimizer = O.Adam(
         list(rnn_encoder.parameters())
         + list(rnn_decoder.parameters())
@@ -107,7 +106,8 @@ def main():
         + list(affine_transform.parameters()),
         lr=hyper_params["learning_rate"],
     )
-    print(f"done!", end="\n\n")
+
+    # TODO Check to see if we're resuming training and if so load the model
 
     sequence_length = training_settings["sequence_length"]
     context_length = training_settings["rnn_encoder_params"]["context_length"]
@@ -116,8 +116,9 @@ def main():
     if not os.path.exists(output_paths["output_folder"]):
         os.mkdir(output_paths["output_folder"])
 
-    print("-- Starting Training")
+    logger.info("Starting Training")
     for epoch in range(training_settings["epochs"]):
+        logger.info(f"Epoch: {epoch}")
 
         epoch_loss = []
 
@@ -125,22 +126,22 @@ def main():
 
         for i, sample in enumerate(dataloader):
 
-            print(f"-- Sample {i}: {sample['fname']}, {sample['mix']['mg'].size()}")
+            logger.info(f"Sample {i}: {sample['fname']}")
 
             mix_mg = sample["mix"]["mg"]
             vocal_mg = sample["vocals"]["mg"]
 
-            print(f"batches in song: {int(mix_mg.shape[1]/batch_size)}")
+            vocal_mg = ideal_masking(mix_mg, vocal_mg, mix_mg) * 2
 
             for batch in range(int(mix_mg.shape[1] / batch_size)):
 
                 batch_start = batch * batch_size
                 batch_end = (batch + 1) * batch_size
 
-                mix_mg_sequence = mix_mg[0, batch_start:batch_end, :, :]
+                mix_mg_sequence = mix_mg[0, batch_start:batch_end, :, :].to(device)
                 vocal_mg_sequence = vocal_mg[
                     0, batch_start:batch_end, context_length:-context_length, :
-                ]
+                ].to(device)
 
                 # feed through masker
                 m_enc = rnn_encoder(mix_mg_sequence)
@@ -180,9 +181,9 @@ def main():
                     loss_m + loss_twin + loss_denoiser + reg_m + reg_twin + reg_denoiser
                 )
 
-                print(
-                    f"loss: {loss:6.9f}, masker: {loss_m:6.9f}, denoiser: {loss_denoiser:6.9f}, twin: {loss_twin:6.9f}"
-                )
+                # logger.info(
+                #     f"loss: {loss:6.9f}, masker: {loss_m:6.9f}, denoiser: {loss_denoiser:6.9f}, twin: {loss_twin:6.9f}"
+                # )
 
                 loss.backward()
 
@@ -202,18 +203,21 @@ def main():
                 # step through optimizer
                 optimizer.step()
 
-                # record losses
                 epoch_loss.append(loss.item())
-            torch.save(epoch_loss, output_paths["masker_loss"])
 
+        # record losses at the end of every epoch
+        torch.save(epoch_loss, output_paths["loss"])
+
+        # we are done training! save and record our model state
+        logger.info(f"Exporting model")
+        torch.save(rnn_encoder.state_dict(), output_paths["rnn_encoder"])
+        torch.save(rnn_decoder.state_dict(), output_paths["rnn_decoder"])
+        torch.save(fnn_masker.state_dict(), output_paths["fnn_masker"])
+        torch.save(fnn_denoiser.state_dict(), output_paths["fnn_denoiser"])
+        torch.save(optimizer.state_dict(), output_paths["optimizer"])
         epoch_end = time.time()
 
-    # we are done training! save and record our model state
-    print(f"-- Exporting model...", end="")
-    torch.save(rnn_encoder, output_paths["rnn_encoder"])
-    torch.save(rnn_decoder, output_paths["rnn_decoder"])
-    torch.save(fnn_masker, output_paths["fnn_masker"])
-    print(f"done!")
+        logger.info(f"Epoch time: {epoch_end-epoch_start}")
 
 
 if __name__ == "__main__":

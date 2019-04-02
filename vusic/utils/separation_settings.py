@@ -10,9 +10,10 @@ __all__ = [
     "model_paths",
 ]
 
-debug = True
+debug = False
 
-HOME = os.path.expanduser("~")
+# XXX
+HOME = os.path.expanduser("~") if debug else "/"
 
 preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "separation"),
@@ -38,14 +39,16 @@ preserved_bins = 744
 
 # context length for RNNs
 context_length = 10
-output_folder = "output"
+output_folder = "output" if debug else os.path.join(HOME, "storage")
 
 output_paths = {
     "output_folder": output_folder,
     "rnn_encoder": os.path.join(output_folder, "rnn_encoder.pth"),
     "rnn_decoder": os.path.join(output_folder, "rnn_decoder.pth"),
     "fnn_masker": os.path.join(output_folder, "fnn_masker.pth"),
-    "masker_loss": os.path.join(output_folder, "masker_loss.pth"),
+    "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
+    "loss": os.path.join(output_folder, "loss.pth"),
+    "optimizer": os.path.join(output_folder, "separation_optimizer.pth"),
     "twin_loss": os.path.join(output_folder, "twin_loss.pth"),
     "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
 }
@@ -62,7 +65,7 @@ model_paths = {
 
 training_settings = {
     "epochs": 1 if debug else 100,
-    "training_path": os.path.join(HOME, "storage", "separation", "pt_f_train"),
+    "training_path": os.path.join(HOME, "storage", "pt_f_train"),
     "context_length": context_length,
     "sequence_length": 60,
     "rnn_encoder_params": {

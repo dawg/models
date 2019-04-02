@@ -110,4 +110,6 @@ venv.bak/
 # Vscode settings
 .vscode/settings.json
 
+/runs
+/transcription_output
 output/

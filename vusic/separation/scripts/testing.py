@@ -21,6 +21,7 @@ from vusic.utils.separation_settings import (
     stft_info,
     output_paths,
 )
+
 from vusic.utils.transforms import (
     overlap_transform_testing,
     context_reshape,
@@ -28,6 +29,7 @@ from vusic.utils.transforms import (
 )
 from vusic.utils.objectives import kl, l2
 from vusic.utils import ISTFT
+from vusic.utils.transforms import overlap_transform
 from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker, FnnDenoiser
 
 
@@ -130,7 +132,6 @@ def main():
         )
 
         for batch in range(int(mix_mg_o.shape[0] / batch_size)):
-
             batch_start = batch * batch_size
             batch_end = (batch + 1) * batch_size
 
@@ -143,8 +144,6 @@ def main():
 
             # denoiser
             temp_prediction = fnn_denoiser(temp_prediction)
-
-            # append the batch prediction to our vocal preciction
             prediction[batch_start:batch_end, :, :] = temp_prediction.data.numpy()
 
         print(f"prediction: {prediction.shape}")
@@ -201,7 +200,6 @@ def main():
         print(
             f"Mean SDR: {np.mean(sdr)}, Mean ISR: {np.mean(isr)}, Mean SIR: {np.mean(sir)}, Mean SAR: {np.mean(sar)}"
         )
-
     test_end = time.time()
 
 

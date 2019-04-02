@@ -19,7 +19,7 @@ torch = "*"
 "pyqt5" = "*"
 matplotlib = "*"
 ipykernel = "*"
-vusic = {editable = true,path = "."}
+vusic = {editable = true, path = "."}
 botocore = "*"
 librosa = "*"
 ffprobe = "*"
@@ -27,6 +27,12 @@ sounddevice = "*"
 protobuf-to-dict = "*"
 black = "*"
 mir-eval = "*"
+tensorboardx = "*"
+ffmpy = "*"
+numpy = "*"
+mido = "*"
+pillow = "*"
+torchvision = "*"
 
 [requires]
 python_version = "3.6"
@@ -38,3 +44,5 @@ allow_prereleases = true
 format = "pipenv run black ."
 check = "pipenv run black --check ."
 test = "pipenv run pytest"
+train-separation = "python vusic/separation/scripts/training.py"
+train-transcription = "python vusic/transcription/training/train.py"

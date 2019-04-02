@@ -112,6 +112,7 @@ def separate(source: str, output: str, logger=None):
         prediction[batch_start:batch_end, :, :] = temp_prediction.data.numpy()
 
     logger.info(f"Saving extracted vocals as {output}")
+
     prediction.shape = (
         prediction.shape[0] * prediction.shape[1],
         stft_info["win_length"],
@@ -126,7 +127,6 @@ def separate(source: str, output: str, logger=None):
 
     logger.info(f"Total time: {str(time.time() - start_time)}")
 
-
 def main():
     arg_parser = argparse.ArgumentParser(
         usage="python separate.py the_file.wav", description="Script to separate audio!"
@@ -137,7 +137,6 @@ def main():
     args = arg_parser.parse_args()
     source_file = args.source_file
 
-    print(source_file)
     separate(source_file, "{}_voice.wav".format(source_file))
 
 

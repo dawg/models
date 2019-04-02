@@ -11,4 +11,5 @@ __all__ = [
     "transcription_settings",
     "transforms",
     "objectives",
+    "audio_helper",
 ]

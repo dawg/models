@@ -6,13 +6,14 @@ __all__ = [
     "stft_info",
     "hyper_params",
     "training_settings",
+    "testing_settings",
     "model_paths",
 ]
 
 debug = False
 
 # XXX
-HOME = os.path.expanduser("~") if debug else "/"
+HOME = os.path.expanduser("~")
 
 preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "separation"),
@@ -52,7 +53,7 @@ output_paths = {
     "fnn_denoiser": os.path.join(output_folder, "fnn_denoiser.pth"),
 }
 
-model_folder = os.path.join(HOME, "senior", "trained")
+model_folder = os.path.join(HOME, "Desktop")
 
 model_paths = {
     "model_folder": model_folder,
@@ -83,4 +84,8 @@ training_settings = {
     "fnn_denoiser_params": {"input_size": stft_info["win_length"], "debug": debug},
     "affine_transform_params": {"debug": debug, "input_size": preserved_bins * 2},
     "batch_size": 16,
+}
+
+testing_settings = {
+    "testing_path": os.path.join(HOME, "storage", "separation", "pt_f_test")
 }

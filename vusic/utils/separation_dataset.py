@@ -59,10 +59,11 @@ class SeparationDataset(Dataset):
 
         # if we're debugging on cpu, we need to convert to float
         # this is because half tensors are not supported on CPU
-        mix["mg"] = mix["mg"].type(torch.float)
-        mix["ph"] = mix["ph"].type(torch.float)
-        vocals["mg"] = vocals["mg"].type(torch.float)
-        vocals["ph"] = vocals["ph"].type(torch.float)
+        if debug:
+            mix["mg"] = mix["mg"].type(torch.float)
+            mix["ph"] = mix["ph"].type(torch.float)
+            vocals["mg"] = vocals["mg"].type(torch.float)
+            vocals["ph"] = vocals["ph"].type(torch.float)
 
         sample = {"mix": mix, "vocals": vocals, "fname": self.filenames[idx]}
 

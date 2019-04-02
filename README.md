@@ -9,12 +9,13 @@ Here is an incomplete list of the major tasks that need to be completed. :runner
 - [x] Load and preprocess MUSDB18 dataset.
 - [x] Implement an STFT algorithm thats optimized for PyTorch.
 - [x] Create spectograms from the STFTs.
-- [ ] :runner: Load and preprocess MAPS dataset
-- [ ] :runner: Implement RNN Encoder/Decoder for Track Seperation
-- [ ] :runner: Implement Denoiser for Track Seperation
-- [ ] Implement the BiLTSM for Onset and frame detection (Music Transcription)
-- [ ] Implement Constant-Q transform for music transcription
-- [ ] Integrate the machine learning models in Vusic 
+- [x] Load and preprocess MAPS dataset
+- [x] Implement RNN Encoder/Decoder for Track Seperation
+- [x] Implement Denoiser for Track Seperation
+- [x] Implement the BiLTSM for Onset and frame detection (Music Transcription)
+- [x] Implement Kelz CNN
+- [x] Test and evaluate transcription model.
+- [x] Integrate the machine learning models in Vusic
 
 ## Contributing
 ### Prerequisites

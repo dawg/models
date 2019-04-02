@@ -44,6 +44,24 @@ def overlap_transform(sample):
     return sample
 
 
+def overlap_transform_testing(sample):
+    """
+        Make samples overlap by context length frames. return the transformed sample
+    """
+    sequence_length = training_settings["sequence_length"]
+    context_length = training_settings["context_length"]
+    batch_size = training_settings["batch_size"]
+
+    sample["mix"]["mg"] = overlap_sequences(
+        sample["mix"]["mg"], context_length, sequence_length, batch_size
+    )
+
+    sample["vocals"]["mg"] = overlap_sequences(
+        sample["vocals"]["mg"], context_length, sequence_length, batch_size
+    )
+    return sample
+
+
 def overlap_sequences(spectrum, context_length, sequence_length, batch_size):
     """
         Make spectrum overlap by context length frames. return the transformed spectrum

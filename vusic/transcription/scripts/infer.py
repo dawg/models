@@ -40,7 +40,7 @@ def transcribe(
     p_est = np.array([midi_to_hz(constants["min_midi"] + midi) for midi in p_est])
 
     os.makedirs(save_path, exist_ok=True)
-    midi_path = os.path.join(save_path, os.path.basename(audio_path) + ".pred.mid")
+    midi_path = os.path.join(save_path, os.path.splitext(os.path.basename(audio_path))[0] + ".mid")
     save_midi(midi_path, p_est, i_est, v_est)
 
 

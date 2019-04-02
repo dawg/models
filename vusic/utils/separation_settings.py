@@ -13,7 +13,7 @@ __all__ = [
 debug = False
 
 # XXX
-HOME = os.path.expanduser("~") if debug else "/"
+HOME = os.path.expanduser("~")
 
 preprocess_settings = {
     "pre_dst": os.path.join(HOME, "storage", "separation"),

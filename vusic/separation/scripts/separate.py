@@ -127,6 +127,7 @@ def separate(source: str, output: str, logger=None):
 
     logger.info(f"Total time: {str(time.time() - start_time)}")
 
+
 def main():
     arg_parser = argparse.ArgumentParser(
         usage="python separate.py the_file.wav", description="Script to separate audio!"

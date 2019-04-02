@@ -6,6 +6,7 @@ import logme
 import tqdm
 import zipfile
 import boto3
+from botocore.client import Config
 import torch
 import threading
 
@@ -51,12 +52,12 @@ class Downloader:
 
         def __call__(self, update: int):
             """
-          Desc:
-             Updates the progress bar
+            Desc:
+                Updates the progress bar
 
-          Args:
-             update (int): Iterations completed since last update
-          """
+            Args:
+                update (int): Iterations completed since last update
+            """
             with self.lock:
                 self.pbar.update(update)
 
@@ -76,14 +77,10 @@ class Downloader:
 
             logger.info("Download started")
 
-            bucket = boto3.resource("s3").Bucket(bucket)
-
-            pbar = self.CallbackProgressBar(
-                bucket.Object(self.dataset).get()["ContentLength"], unit="bytes"
-            )
+            bucket = boto3.resource("s3").Bucket(self.bucket)
 
             try:
-                bucket.download_file(self.dataset, path, Callback=pbar)
+                bucket.download_file(self.dataset, path)
             except Exception:
                 logger.info(f"Failed to download {self.dataset}")
                 raise
@@ -93,31 +90,29 @@ class Downloader:
     @logme.log
     def get_dataset(self, directory: str, dst: str, logger: object = None):
         """
-       Desc:
-          Retrieve the dataset. If it isn't available, download it
+        Desc:
+            Retrieve the dataset. If it isn't available, download it
 
-          Args:
-             directory (string): directory to be retrieved from our bucket
+        Args:
+            directory (string): directory to be retrieved from our bucket
 
-             path (string, optional): path to dataset if it has already been downloaded
+            dst (string): destination to extract the dataset to
 
-             logger (object, optional): logger
-       """
+            logger (object, optional): logger
+        """
 
         if not os.path.exists(dst):
             logger.info(f"Making {dst}")
             os.makedirs(dst)
 
-        if path == None:
-            path = self.download_dataset(dst)
+        path = self.download_dataset(dst)
 
         with zipfile.ZipFile(path, "r") as z:
-
             logger.info(f"Extracting files from {path}")
             for fname in tqdm.tqdm(z.namelist(), unit="Ex"):
                 if fname.startswith(directory) and not os.path.exists(
                     os.path.join(dst, fname)
                 ):
+                    logger.info(f"file in {path}")
                     z.extractall(path=dst, members=[fname])
-
         return

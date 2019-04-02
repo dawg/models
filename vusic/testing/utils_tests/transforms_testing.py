@@ -1,55 +1,50 @@
-from vusic.utils.separation_dataset import SeparationDataset
 import os
+import torch
+from torch.utils.data import Dataset
 import PyQt5
 import matplotlib.pyplot as plt
 
+import numpy as np
+
+import librosa.display
+
+from vusic.utils import STFT, ISTFT, SeparationDataset
+from vusic.utils.separation_settings import stft_info
+
+
 if __name__ == "__main__":
     HOME = os.path.expanduser("~")
-    TEST = os.path.join(HOME, "storage", "separation", "pt_test")
-    TRAIN = os.path.join(HOME, "storage", "separation", "pt_train")
+    TEST = os.path.join(HOME, "storage", "separation", "pt_f_test")
+    TRAIN = os.path.join(HOME, "storage", "separation", "pt_f_train")
     train_ds = SeparationDataset(TRAIN)
-    test_ds = SeparationDataset(TEST)
+    # test_ds = SeparationDataset(TEST)
+
     print(f"Training set contains {len(train_ds)} samples.")
-    print(f"Testing set contains {len(test_ds)} samples.")
+    # print(f"Testing set contains {len(test_ds)} samples.")
 
-    stft = STFT()
-    istft = ISTFT()
+    # sample = train_ds[0]
 
-    nsamples = 10000
-    window_width = 512
+    # f_sample = sample["mix"]
 
-    idx = 0
+    # D = librosa.amplitude_to_db(f_sample["mg"], ref=np.max)
+    # plt.figure(1)
+    # librosa.display.specshow(D, y_axis="log")
+    # plt.colorbar(format="%+2.0f dB")
+    # plt.title("Logarithmic Frequency Power Spectrogram of Mixture")
+    # plt.show()
 
-    # grab a random sample
-    sample = train_ds[idx]
+    # D = librosa.amplitude_to_db(sample["vocals"]["mg"], ref=np.max)
+    # plt.figure(2)
+    # librosa.display.specshow(D, y_axis="log")
+    # plt.colorbar(format="%+2.0f dB")
+    # plt.title("Logarithmic Frequency Power Spectrogram of ")
+    # plt.show()
 
-    # convert to "mono"
-    thing = sample["mix"][:, 0:nsamples, 0]
+    path = os.path.expanduser("~")
 
-    magnitude, phase, ac = stft.forward(Variable(thing))
-    print(f"{magnitude.shape}, {phase.shape}, {ac.shape}")
+    x = torch.load(os.path.join(path, "storage", "separation", "loss.pth"))
 
-    reconstruction = istft.forward(magnitude, phase, ac)
-    print(f"{reconstruction.shape}")
-
-    f, subplot = plt.subplots(4, sharex=True)
-
-    subplot[0].set_title("Audio Sample: {}".format(train_ds.filenames[idx]))
-    subplot[0].set_xlim(0, nsamples)
-    subplot[0].plot(range(nsamples), torch.t(thing).numpy()[0:nsamples])
-    subplot[0].set_ylabel("Mix")
-    subplot[1].plot(
-        range(window_width), np.transpose(magnitude.detach().numpy()[0, :, :, 0])
-    )
-    subplot[1].set_ylabel("STFT Mix (Magnitude)")
-    subplot[2].plot(
-        range(window_width), np.transpose(phase.detach().numpy()[0, :, :, 0])
-    )
-    subplot[2].set_ylabel("STFT Mix (Phase)")
-    subplot[3].plot(
-        range(reconstruction.shape[1]),
-        torch.t(reconstruction.detach()).numpy()[0:nsamples],
-    )
-    subplot[3].set_ylabel("Reconstructed Mix (Phase)")
-
+    print(f"size {len(x)}")
+    plt.figure(1)
+    plt.plot(x)
     plt.show()

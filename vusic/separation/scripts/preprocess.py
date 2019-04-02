@@ -8,8 +8,11 @@ import botocore
 import stempeg
 import torch
 import numpy as np
+import librosa
 
-from vusic.utils.transforms import STFT
+import scipy.io.wavfile
+
+from vusic.utils import STFT
 from vusic.utils.separation_settings import preprocess_settings, stft_info
 from vusic.utils import Downloader
 
@@ -27,14 +30,10 @@ class Stem:
     VOCALS = (4,)
 
 
-def write_stem_pt(
-    dst: str,
-    fname: str,
-    stem: object,
-    is_stft: bool = False,
-    window_size: int = 4046,
-    hop_size: int = 2048,
-):
+stft = STFT.from_params(stft_info)
+
+
+def write_stem_pt(dst: str, fname: str, stem: object, is_stft: bool = False):
     """
     Desc:
         writes a stem as a .pth to dst with fname as the file name
@@ -50,17 +49,27 @@ def write_stem_pt(
     fname += ".pth"
 
     if is_stft:
-        mix = torch.from_numpy(stem[Stem.MIX, :, :].astype(np.float32))
-        vocals = torch.from_numpy(stem[Stem.VOCALS, :, :].astype(np.float32))
-
-        stft = STFT(window_size=window_size, hop_size=hop_size)
+        mix = np.transpose(stem[Stem.MIX, :, :])
+        vocals = np.transpose(stem[Stem.VOCALS, :, :])
 
         mix = mix[:, :, 0]
         vocals = vocals[:, :, 0]
 
-        # XXX maybe as an object instead of a tuple?
-        fmix = stft.forward(mix)
-        fvocals = stft.forward(vocals)
+        mix = librosa.core.to_mono(mix)
+        vocals = librosa.core.to_mono(vocals)
+
+        mgmix, phmix = stft(mix)
+        mgvocals, phvocals = stft(vocals)
+
+        fmix = {
+            "mg": torch.from_numpy(mgmix.astype(np.float16)),
+            "ph": torch.from_numpy(phmix.astype(np.float16)),
+        }
+
+        fvocals = {
+            "mg": torch.from_numpy(mgvocals.astype(np.float16)),
+            "ph": torch.from_numpy(phvocals.astype(np.float16)),
+        }
 
         torch.save(fmix, os.path.join(dst, "mix", fname))
         torch.save(fvocals, os.path.join(dst, "vocals", fname))
@@ -74,14 +83,7 @@ def write_stem_pt(
 
 
 @logme.log
-def write(
-    src: str,
-    dst: str,
-    is_stft: bool = False,
-    window_size: int = 4094,
-    hop_size: int = 2048,
-    logger: object = None,
-):
+def write(src: str, dst: str, is_stft: bool = False, logger: object = None):
     """
     Desc: 
         writes the dataset as either a numpy file or a pytorch file
@@ -124,20 +126,15 @@ def write(
             if not os.path.exists(sname):
                 raise FileNotFoundError(f"{sname} not found")
 
-            if not os.path.exists(
+            checks = not os.path.exists(
                 os.path.join(dst, "vocals", fname + suffix)
-            ) and not os.path.exists(os.path.join(dst, "mix", fname + suffix)):
+            ) and not os.path.exists(os.path.join(dst, "mix", fname + suffix))
+
+            if checks:
 
                 stem, rate = stempeg.read_stems(sname)
 
-                write_stem_pt(
-                    dst,
-                    fname,
-                    stem,
-                    is_stft=is_stft,
-                    window_size=window_size,
-                    hop_size=hop_size,
-                )
+                write_stem_pt(dst, fname, stem, is_stft=is_stft)
 
     except Exception:
         logger.info(f"Removing {dst}")
@@ -147,27 +144,15 @@ def write(
 
 
 def main():
-    downloader = Downloader.from_params(preprocess_settings["downlader"])
+    downloader = Downloader.from_params(preprocess_settings["downloader"])
 
     dst = preprocess_settings["pre_dst"]
 
     downloader.get_dataset(Set.TRAIN, dst)
     downloader.get_dataset(Set.TEST, dst)
 
-    write(
-        os.path.join(dst, "train"),
-        os.path.join(dst, "pt_f_train"),
-        window_size=stft_info["window_size"],
-        hop_size=stft_info["hop_size"],
-        is_stft=True,
-    )
-    write(
-        os.path.join(dst, "test"),
-        os.path.join(dst, "pt_f_test"),
-        window_size=stft_info["window_size"],
-        hop_size=stft_info["hop_size"],
-        is_stft=True,
-    )
+    write(os.path.join(dst, "train"), os.path.join(dst, "pt_f_train"), is_stft=True)
+    write(os.path.join(dst, "test"), os.path.join(dst, "pt_f_test"), is_stft=True)
 
 
 if __name__ == "__main__":

@@ -1,26 +1,28 @@
 import torch
 import torch.nn as nn
 
-__all__ = ["RnnDecoder"]
+
+__all__ = ["TwinReg"]
 
 
-class RnnDecoder(nn.Module):
+class TwinReg(nn.Module):
     def __init__(self, input_size, debug):
         """
-        Desc: 
-            create an RNN decoder
+        Desc:
+            create a twindecoder
 
         Args:
-            input_size (int): shape of the input
+            input_size (int): 
 
             debug (bool): debug mode
         """
-        super(RnnDecoder, self).__init__()
+        super(TwinReg, self).__init__()
+
+        self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
         self.input_size = input_size
 
-        # create gated recurrent unit cells in the shape of our input
-        self.gru_dec = nn.GRUCell(self.input_size, self.input_size)
+        self.gru = nn.GRUCell(self.input_size, self.input_size)
 
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
 
@@ -33,49 +35,55 @@ class RnnDecoder(nn.Module):
         """
 
         # init input hidden weights
-        nn.init.xavier_normal_(self.gru_dec.weight_ih)
+        nn.init.xavier_normal_(self.gru.weight_ih)
 
         # init hidden^2 weights
-        nn.init.orthogonal_(self.gru_dec.weight_hh)
+        nn.init.orthogonal_(self.gru.weight_hh)
 
         # init input hidden bias
-        self.gru_dec.bias_ih.data.zero_()
+        self.gru.bias_ih.data.zero_()
 
         # init hidden^2 bias
-        self.gru_dec.bias_hh.data.zero_()
+        self.gru.bias_hh.data.zero_()
 
     @classmethod
     def from_params(cls, params):
         """
         Desc: 
-            create an RNN decoder from parameters
+            create Twin Net Regularizer from parameters
 
         Args:
-            param (object): parameters for creating the RNN. Must contain the following
+            param (object): parameters for creating the object. Must contain the following
                 input_size (int): shape of the input
+
+                context_length (int): length 
 
                 debug (bool): debug mode
         """
+        # todo add defaults
         return cls(params["input_size"], params["debug"])
 
     def forward(self, m_enc):
         """
-        Desc: 
-            feed forward through RNN decoder
+        Desc:
+            Forward pass through Twin Net Regularizer.
 
         Args:
-            encoder_out (torch.autograd.variable.Variable): output of the RNN encoder
+            
         """
 
         batch_size = m_enc.size()[0]
         sequence_length = m_enc.size()[1]
+
         m_h_dec = torch.zeros(batch_size, self.input_size).to(self.device)
         m_dec = torch.zeros(batch_size, sequence_length, self.input_size).to(
             self.device
         )
 
-        for t in range(sequence_length):
-            m_h_dec = self.gru_dec(m_enc[:, t, :], m_h_dec)
-            m_dec[:, t, :] = m_h_dec
+        for ts in range(sequence_length - 1, -1, -1):
+            m_h_dec = self.gru(m_enc[:, ts, :], m_h_dec)
+            m_dec[:, ts, :] = m_h_dec
 
         return m_dec
+
+        pass

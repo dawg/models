@@ -6,23 +6,32 @@ __all__ = ["RnnEncoder"]
 
 
 class RnnEncoder(nn.Module):
-    def __init__(self, in_dim, context_length, debug):
+    def __init__(self, input_size, context_length, debug):
         """
         Desc:
             create an RNN encoder
 
         Args:
-            in_dim (int): shape of the input
+            input_size (int): shape of the input
+
             context_length (int): the context length
+
             debug (bool): debug mode
         """
         super(RnnEncoder, self).__init__()
 
-        self.in_dim = in_dim
+        self.input_size = input_size
         self.context_length = context_length
 
-        self.gru_enc_f = nn.GRUCell(self.in_dim, self.in_dim)
-        self.gru_enc_b = nn.GRUCell(self.in_dim, self.in_dim)
+        # init forward RNN
+        self.gru_enc_f = nn.GRUCell(
+            input_size=self.input_size, hidden_size=self.input_size
+        )
+
+        # init backward RNN
+        self.gru_enc_b = nn.GRUCell(
+            input_size=self.input_size, hidden_size=self.input_size
+        )
 
         # train on GPU or CPU
         self.device = "cuda" if not debug and torch.cuda.is_available() else "cpu"
@@ -68,14 +77,14 @@ class RnnEncoder(nn.Module):
 
         Args:
             param (object): parameters for creating the RNN. Must contain the following
-                in_dim (int): shape of the input
+                input_size (int): shape of the input
 
                 context_length (int): length 
 
                 debug (bool): debug mode
         """
         # todo add defaults
-        return cls(params["in_dim"], params["context_length"], params["debug"])
+        return cls(params["input_size"], params["context_length"], params["debug"])
 
     def forward(self, v_in):
         """
@@ -83,35 +92,65 @@ class RnnEncoder(nn.Module):
             Forward pass through RNN encoder.
 
         Args:
-            :param v_in: The input to the RNN encoder of the Masker.
-            :type v_in: numpy.core.multiarray.ndarray
-            :return: The output of the RNN encoder of the Masker.
-            :rtype: torch.autograd.variable.Variable
+            windows (torch.float[sequence_length, window size > ]): Set of batch_size frequency windows.
+ 
+        Returns:
+            The output of the RNN encoder.
+            
         """
+
+        # batch_size = windows.size()[0]
+        # sequence_length = windows.size()[1]
+
+        # forward_t = torch.zeros(batch_size, self.input_size).to(self.device)
+        # backward_t = torch.zeros(batch_size, self.input_size).to(self.device)
+
+        # m_enc = torch.zeros(
+        #     batch_size, sequence_length - (2 * self.context_length), 2 * self.input_size
+        # ).to(self.device)
+
+        # # remove some windows
+        # windows_reduced = windows[:, :, : self.input_size]
+
+        # for t in range(sequence_length):
+
+        #     forward_t = self.gru_enc_f((windows_reduced[:, t, :]), forward_t)
+        #     backward_t = self.gru_enc_b(
+        #         (windows_reduced[:, sequence_length - t - 1, :]), backward_t
+        #     )
+
+        #     if self.context_length <= t < sequence_length - self.context_length:
+        #         m_h_enc = torch.cat(
+        #             [
+        #                 forward_t + windows_reduced[:, t, :],
+        #                 backward_t + windows_reduced[:, sequence_length - t - 1, :],
+        #             ],
+        #             dim=1,
+        #         )
+
+        #         m_enc[:, t - self.context_length, :] = m_h_enc
+
         batch_size = v_in.size()[0]
         seq_length = v_in.size()[1]
 
-        h_t_f = torch.zeros(batch_size, self._input_dim).to(self._device)
-        h_t_b = torch.zeros(batch_size, self._input_dim).to(self._device)
+        h_t_f = torch.zeros(batch_size, self.input_size).to(self.device)
+        h_t_b = torch.zeros(batch_size, self.input_size).to(self.device)
 
         h_enc = torch.zeros(
-            batch_size, seq_length - (2 * self._context_length), 2 * self._input_dim
-        ).to(self._device)
+            batch_size, seq_length - (2 * self.context_length), 2 * self.input_size
+        ).to(self.device)
 
-        v_tr = v_in[:, :, : self._input_dim]
+        v_tr = v_in[:, :, : self.input_size]
 
         for t in range(seq_length):
             h_t_f = self.gru_enc_f((v_tr[:, t, :]), h_t_f)
             h_t_b = self.gru_enc_b((v_tr[:, seq_length - t - 1, :]), h_t_b)
 
-            if self._context_length <= t < seq_length - self._context_length:
+            if self.context_length <= t < seq_length - self.context_length:
                 h_t = torch.cat(
                     [h_t_f + v_tr[:, t, :], h_t_b + v_tr[:, seq_length - t - 1, :]],
                     dim=1,
                 )
-                h_enc[:, t - self._context_length, :] = h_t
+                h_enc[:, t - self.context_length, :] = h_t
 
         return h_enc
-
-
-# EOF

@@ -8,9 +8,10 @@ This repo is used to develop the machine learning models used for automated trac
 Here is an incomplete list of the major tasks that need to be completed. :runner: indicates active development.
 - [x] Load and preprocess MUSDB18 dataset.
 - [x] Implement an STFT algorithm thats optimized for PyTorch.
-- [ ] :runner: Create spectograms from the STFTs.
-- [ ] Load and preprocess MAPS dataset
-- [ ] Impplement CNN for Track Seperation
+- [x] Create spectograms from the STFTs.
+- [ ] :runner: Load and preprocess MAPS dataset
+- [ ] :runner: Implement RNN Encoder/Decoder for Track Seperation
+- [ ] :runner: Implement Denoiser for Track Seperation
 - [ ] Implement the BiLTSM for Onset and frame detection (Music Transcription)
 - [ ] Implement Constant-Q transform for music transcription
 - [ ] Integrate the machine learning models in Vusic 

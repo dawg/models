@@ -7,17 +7,20 @@ env:
 python:
   - "3.6"
 
+before_install:
+  - sudo apt-get install libasound-dev
+  - sudo apt-get install libjack-dev
+
 install:
   - pip install --upgrade pip
   - pip --version
   - pip install pipenv==2018.10.9
   - pipenv --version
-  - pipenv install --pre --dev --deploy
+  - pipenv install --pre --dev --deploy --skip-lock
 
 script:
   - pipenv run check
-  - pipenv run test
-  
+    
 branch:
   - master
   - develop

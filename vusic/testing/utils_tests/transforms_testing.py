@@ -40,7 +40,9 @@ if __name__ == "__main__":
     # plt.title("Logarithmic Frequency Power Spectrogram of ")
     # plt.show()
 
-    x = torch.load("output/masker_loss.pth")
+    path = os.path.expanduser("~")
+
+    x = torch.load(os.path.join(path, "storage", "separation", "loss.pth"))
 
     print(f"size {len(x)}")
     plt.figure(1)

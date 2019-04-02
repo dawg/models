@@ -129,8 +129,7 @@ def separate(source: str, output: str, logger=None):
 
 def main():
     arg_parser = argparse.ArgumentParser(
-        usage="python separate.py the_file.wav",
-        description="Script to separate audio!",
+        usage="python separate.py the_file.wav", description="Script to separate audio!"
     )
 
     arg_parser.add_argument("source_file", type=str)

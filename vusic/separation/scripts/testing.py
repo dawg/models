@@ -21,7 +21,11 @@ from vusic.utils.separation_settings import (
     stft_info,
     output_paths,
 )
-from vusic.utils.transforms import overlap_transform_testing, context_reshape, overlap_sequences
+from vusic.utils.transforms import (
+    overlap_transform_testing,
+    context_reshape,
+    overlap_sequences,
+)
 from vusic.utils.objectives import kl, l2
 from vusic.utils import ISTFT
 from vusic.separation.modules import RnnDecoder, RnnEncoder, FnnMasker, FnnDenoiser
@@ -161,7 +165,9 @@ def main():
         background = np.add(-voice, mixture)
         background_hat = np.add(-voice_hat[:minlen], mixture[:minlen])
 
-        print(f"prediction: {prediction.shape}, voice_hat: {voice_hat.shape}, voice: {voice.shape}")
+        print(
+            f"prediction: {prediction.shape}, voice_hat: {voice_hat.shape}, voice: {voice.shape}"
+        )
 
         (
             temp_sdr,

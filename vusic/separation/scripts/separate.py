@@ -138,7 +138,7 @@ def main():
     args = arg_parser.parse_args()
     source_file = args.source_file
 
-    separate(source_file, "{}_voice.wav".format(source_file))
+    separate(source_file, "{}_voice.wav".format(re.sub("\.wav$", "", source_file)))
 
 
 if __name__ == "__main__":
